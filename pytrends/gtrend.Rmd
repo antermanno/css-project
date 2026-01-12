@@ -1,0 +1,12 @@
+```{r setup, include= FALSE}
+library(reticulate)
+py_require(
+  packages = c( "pytrends" ))
+```
+
+```{python}
+from pytrends.request import TrendReq
+
+pytrends = TrendReq(hl='en-US', tz=360)
+```
+
