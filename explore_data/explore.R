@@ -11,6 +11,9 @@ senato18 = data.table::fread("../data/senato-20180304/Senato2018_livComune.txt")
 
 camera13 = data.table::fread("../data/camera-20130224/camera_italia-20130224.txt")
 senato13 = data.table::fread("../data/senato-20130224/senato_italia-20130224.txt")
+
+camera08 = data.table::fread("../data/camera-20080413/camera_italia-20080413.txt")
+senato08 = data.table::fread("../data/senato-20080413/senato_italia-20080413.txt")
 # get a toy sample to familiarize with data
 # ind = sample.int(10, 5)
 
@@ -20,7 +23,7 @@ camera[COMUNE == "BOLOGNA", #| COMUNE == "PIACENZA" | COMUNE == "FIRENZE" ,
          `CIRC-REG`, CODTIPOELEZIONE)]
 
 senato[COMUNE == "VALSAMOGGIA", #| COMUNE == "PIACENZA" | COMUNE == "FIRENZE" ,
-       .(VOTICANDIDATO, VOTILISTA, DESCRLISTA, COGNOME, COMUNE,
+       .(VOTICANDIDATO,  VOTILISTA, DESCRLISTA, COGNOME, COMUNE,
          COLLPLURI, COLLUNINOM)]
 
 
@@ -54,10 +57,31 @@ c8[ ,.(LISTA,percentage = 100 * sum / sum(sum) ) ]
 
 library(stringr)
 # Let's extract the percentages by region and year
-# 2013
-camera13[,unique(CIRCOSCRIZIONE)]
-camera13[, .(REGION = str_extract(CIRCOSCRIZIONE, '\\w*'))]
+# 2008
+
+# get_electoral_data_country <- function(DT, list, list_votes, region){
+#   DT[, TOTAL_VOTES_BY_LIST := sum(c(list_votes)), by = c(list)]
+#   # DT[, REGION := str_extract(region, "\\w*")]
+#   # DT[, .(list, PERCENTAGE = TOTAL_VOTES_BY_LIST, TOTAL_VOTES_BY_LIST)]
+# }
+
+# get_electoral_data_country(camera08, "LISTA", "VOTI_LISTA", "CIRCOSCRIZIONE")
+
+camera08[, .(REGION = str_extract(CIRCOSCRIZIONE, '\\w*'))]
+senato08[, unique(REGIONE)]
+camera08[, REGIONE := str_extract(CIRCOSCRIZIONE, "\\w*")]
+c08 = camera08[, .(TOT_VOTES = sum(VOTI_LISTA)), by = c("REGIONE", "LISTA")]
+c08[ REGIONE == "PUGLIA", ]
+s08 = senato08[, .(TOT_VOTES = sum(VOTI_LISTA)), by = c("REGIONE", "LISTA")]
+s08[ REGIONE == "PUGLIA", ]
+
+
+camera13[, REGIONE := str_extract(CIRCOSCRIZIONE, '\\w*')]
 senato13[, unique(REGIONE)]
+c13 = camera13[, .(TOT_VOTES = sum(VOTI_LISTA)), by = c("REGIONE", "LISTA")]
+c13[ REGIONE == "PUGLIA", ]
+s13 = senato13[, .(TOT_VOTES = sum(VOTI_LISTA)), by = c("REGIONE", "LISTA")]
+s13[ REGIONE == "PUGLIA", ]
 
 camera18[, .(REGION = str_extract(CIRCOSCRIZIONE, '\\w*'))][,unique(REGION)]
 senato18[, unique(REGIONE)]
