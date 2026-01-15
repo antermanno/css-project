@@ -10,19 +10,19 @@ Create the request object class with proxies and such:
 see [pytrends](https://pypi.org/project/pytrends/#api)
 ```{python}
 from pytrends.request import TrendReq
-
-pytrends = TrendReq(hl='en-US', tz=360, timeout=(10,25), retries=2, backoff_factor=0.1)
+pytrends = TrendReq(hl='en-US', tz=360)
+# pytrends = TrendReq(hl='en-US', tz=360, timeout=(10,25), backoff_factor=0.1)   
 ```
 
 Define the request and the properties
 ```{python}
-kw_list = ["Ciao"]
-pytrends.build_payload(kw_list, cat=0, timeframe='today 5-y', geo='UK', gprop='')
+kw_list = ["ciao", "immigrati"]
+pytrends.build_payload(kw_list, timeframe='today 12-m', geo='IT')
 ```
 
 Get the request
 ```{python}
-ciao_it = pytrends.interest_over_time()
+ciao_it = pytrends.multirange_interest_over_time()
 ```
 
 Read it in R
