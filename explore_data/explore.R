@@ -8,7 +8,6 @@ senato = data.table::fread("../data/senato-20220925/Senato_Italia_LivComune.csv"
 
 camera18 = data.table::fread("../data/camera-20180304/Camera2018_livComune.txt")
 senato18 = data.table::fread("../data/senato-20180304/Senato2018_livComune.txt")
-camera_reg = data.table::fread("../data/camera-20180304/")
 
 camera13 = data.table::fread("../data/camera-20130224/camera_italia-20130224.txt")
 senato13 = data.table::fread("../data/senato-20130224/senato_italia-20130224.txt")
@@ -53,10 +52,16 @@ camera_no_aosta = camera18[CIRCOSCRIZIONE != "AOSTA",]
 c8 = camera_no_aosta[, .(sum = sum(VOTI_LISTA)), by = .(LISTA )][sum > 10e5] [order(-sum)]
 c8[ ,.(LISTA,percentage = 100 * sum / sum(sum) ) ]
 
+library(stringr)
+# Let's extract the percentages by region and year
+# 2013
+camera13[,unique(CIRCOSCRIZIONE)]
+camera13[, .(REGION = str_extract(CIRCOSCRIZIONE, '\\w*'))]
+senato13[, unique(REGIONE)]
 
-#######################################
-#############  Lab 1 ##################
-#######################################
-# install.packages
-# install.packages
-# install.packages()
+camera18[, .(REGION = str_extract(CIRCOSCRIZIONE, '\\w*'))][,unique(REGION)]
+senato18[, unique(REGIONE)]
+
+
+camera[, .(REGION = str_extract(`CIRC-REG`, '\\w*'))][,unique(REGION)]
+senato[, unique(`CIRC-REG`)]
