@@ -7,7 +7,11 @@ camera = data.table::fread("../data/camera-20220925/Camera_Italia_LivComune.csv"
 senato = data.table::fread("../data/senato-20220925/Senato_Italia_LivComune.csv")
 
 camera18 = data.table::fread("../data/camera-20180304/Camera2018_livComune.txt")
+senato18 = data.table::fread("../data/senato-20180304/Senato2018_livComune.txt")
+camera_reg = data.table::fread("../data/camera-20180304/")
 
+camera13 = data.table::fread("../data/camera-20130224/camera_italia-20130224.txt")
+senato13 = data.table::fread("../data/senato-20130224/senato_italia-20130224.txt")
 # get a toy sample to familiarize with data
 # ind = sample.int(10, 5)
 
@@ -42,6 +46,13 @@ camera[, length(unique(COLLUNINOM))]
 
 camera18[LISTA = ,]
 # plot a map
+camera18[LISTA == "MOVIMENTO 5 STELLE", sum(is.na(VOTI_LISTA)), by = CIRCOSCRIZIONE]
+camera_no_aosta = camera18[CIRCOSCRIZIONE != "AOSTA",]
+
+
+c8 = camera_no_aosta[, .(sum = sum(VOTI_LISTA)), by = .(LISTA )][sum > 10e5] [order(-sum)]
+c8[ ,.(LISTA,percentage = 100 * sum / sum(sum) ) ]
+
 
 #######################################
 #############  Lab 1 ##################
@@ -49,25 +60,3 @@ camera18[LISTA = ,]
 # install.packages
 # install.packages
 # install.packages()
-
-library(tidyverse)
-library(sf)
-library(tmap)
-
-# Load the map of italian provinces
-
-map <- read_sf("../data/map-folder/map.shp")
-
-class(map)
-map
-
-# mapping the boundaries of the italian provinces
-# using the tmap library
-
-tm_shape(map) +
-  tm_borders()
-
-# number of provinces in the map
-n <- nrow(map)
-n
-
