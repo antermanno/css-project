@@ -3,24 +3,49 @@
 rm(list = ls())
 library(data.table)
 library(ggplot2)
-camera = data.table::fread("../data/camera-20220925/Camera_Italia_LivComune.csv")
-senato = data.table::fread("../data/senato-20220925/Senato_Italia_LivComune.csv")
+library(dplyr)
+source("explore_data/utils.R")
 
-camera18 = data.table::fread("../data/camera-20180304/Camera2018_livComune.txt")
-senato18 = data.table::fread("../data/senato-20180304/Senato2018_livComune.txt")
+# load all electoral files from the data directory
+load_all_data_tables()
 
-camera13 = data.table::fread("../data/camera-20130224/camera_italia-20130224.txt")
-senato13 = data.table::fread("../data/senato-20130224/senato_italia-20130224.txt")
+# let's join everything in a big happy table-family
+camera22 |> names()
+camera18 |> names()
+camera13 |> names()
+camera08 |> names()
 
-camera08 = data.table::fread("../data/camera-20080413/camera_italia-20080413.txt")
-senato08 = data.table::fread("../data/senato-20080413/senato_italia-20080413.txt")
-# get a toy sample to familiarize with data
-# ind = sample.int(10, 5)
+# remove aosta regional district
+camera18 = camera18[CIRCOSCRIZIONE != "AOSTA"]
+
+camera_all_list = list(camera08 = camera08,
+                       camera13 = camera13,
+                       camera18 = camera18,
+                       camera22 = camera22)
+
+# stack all the rows (full join)
+camera_all = rbindlist(camera_all_list,use.names = TRUE, idcol = "YEAR", fill = TRUE)
+camera_all[, .(CIRCOSCRIZIONE = fcoalesce(CIRCOSCRIZIONE, `CIRC-REG`))]
+
+# make only one elettori column
+camera_all[, .(ELETTORI = fcoalesce(ELETTORI, ELETTORITOT))] # |> is.na() |> sum()
+
+camera_all[, .(LISTA = fcoalesce(DESCRLISTA, LISTA))] # |> is.na() |> sum()
+
+camera_all[CIRCOSCRIZIONE != "AOSTA",
+           .(VOTILISTA = fcoalesce(VOTILISTA, VOTI_LISTA))] |> nrow()
+
+camera_all[CIRCOSCRIZIONE == "AOSTA", .N] # |> is.na() |> sum()
+camera_all[, .N] # |> is.na() |> sum()
+
+# get abstension
+camera08[COMUNE == "BOLOGNA",
+         .(ELETTORI, VOTANTI, ELETTORI_MASCHI,
+           ASTENSIONE = 1 - VOTANTI/ELETTORI)]
 
 # get the data at communal level
-camera[COMUNE == "BOLOGNA", #| COMUNE == "PIACENZA" | COMUNE == "FIRENZE" ,
-       .(VOTICANDIDATO, VOTILISTA, DESCRLISTA, COGNOME, COMUNE,
-         `CIRC-REG`, CODTIPOELEZIONE)]
+camera22[COMUNE == "BOLOGNA", #| COMUNE == "PIACENZA" | COMUNE == "FIRENZE" ,
+       .( VOTICANDIDATO, VOTILISTA, DESCRLISTA)]
 
 senato[COMUNE == "VALSAMOGGIA", #| COMUNE == "PIACENZA" | COMUNE == "FIRENZE" ,
        .(VOTICANDIDATO,  VOTILISTA, DESCRLISTA, COGNOME, COMUNE,
@@ -55,7 +80,7 @@ camera_no_aosta = camera18[CIRCOSCRIZIONE != "AOSTA",]
 c8 = camera_no_aosta[, .(sum = sum(VOTI_LISTA)), by = .(LISTA )][sum > 10e5] [order(-sum)]
 c8[ ,.(LISTA,percentage = 100 * sum / sum(sum) ) ]
 
-library(stringr)
+stringdist(camera08$CIRCOSCRIZIONE, c("EMILIA" , "TOSCANA"))
 # Let's extract the percentages by region and year
 # 2008
 
