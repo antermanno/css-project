@@ -38,6 +38,30 @@ camera22 <<- camera22[ , `:=`(
 )]
 }
 
+filter_minor_parties <- function(partylist){
+  dplyr::case_match(
+    partylist,
+    c("LEGA PER SALVINI PREMIER", "LEGA", "LEGA NORD") ~ "LEGA",
+    c("FORZA ITALIA", "IL POPOLO DELLA LIBERTA'") ~ "FORZA ITALIA",
+    c("FRATELLI D'ITALIA", "FRATELLI D'ITALIA CON GIORGIA MELONI") ~ "FRATELLI D'ITALIA",
+    c("PARTITO DEMOCRATICO", "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA") ~ "PARTITO DEMOCRATICO",
+    c("MOVIMENTO 5 STELLE", "MOVIMENTO 5 STELLE BEPPEGRILLO.IT") ~ "MOVIMENTO 5 STELLE",
+    .default = "O"
+  )
+}
+
+filter_right_wing_mainstream <- function(partylist){
+  dplyr::case_match(
+    partylist,
+    c("LEGA", "FORZA ITALIA", "FRATELLI D'ITALIA") ~ "MAINSTREAM_RIGHT",
+    .default = "O"
+  )
+}
+
+filter_right_wing <- function(partylist){
+  filter_right_wing_mainstream(filter_minor_parties(partylist))
+}
+
 # load data from the gtrends folder
 load_gtrends_data <- function(){
   files = list.files(path = "data/gtrends/")
