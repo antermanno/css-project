@@ -36,7 +36,7 @@ lapply(list(camera08, camera13, camera18, camera22), function(x){
 (test = get_turnout_by(camera18))
 test[, .(TURNOUT = (sum(TOTVOT)/sum(TOTEL)))]
 
-(tmp = get_rcsr_by_region(gtrend))
+(tmp = get_rcsr_by_region(gtrend, year= 2018))
 
 
 (joint = get_joint_voteshare_rcsr_tbl(camera22 ,rcsr_tbl = tmp,
@@ -56,86 +56,164 @@ lista08 = camera08$LISTA |> unique()
 # get the major parties or just the right wing parties
 filter_minor_parties(
     c(lista08, lista13, lista18, lista22)
-) |> filter_right_wing_mainstream()
+) |> unique()
 
 filter_right_wing(
     c(lista08, lista13, lista18, lista22)
 )
 
-# let's setup a dataset for estimation
-year = camera22
-all_parties22 = lapply(unique(year$LISTA) , get_joint_voteshare_rcsr_tbl,
-        table = year, rcsr_tbl = tmp)
-all_parties22 = rbindlist(all_parties22)
-all_parties22[, YEAR := "Y2022"]
+# get the vote share for all party since 2013
+data_221813 = get_party_share_all_years()
 
-year = camera18
-all_parties18 = lapply(unique(year$LISTA) , get_joint_voteshare_rcsr_tbl,
-        table = year, rcsr_tbl = tmp)
-all_parties18 = rbindlist(all_parties18)
-all_parties18[, YEAR := "Y2018"]
+share_rx = get_share_by_region_year(data_221813, party = "CASAPOUND ITALIA")
 
+# share_rx = data_221813[RIGHTWING == "MAINSTREAM_RIGHT",
+#           .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ]
+#
+# share_rx = data_221813[PARTY == "LEGA",
+#           .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ]
 
-year = camera13
-all_parties13 = lapply(unique(year$LISTA) , get_joint_voteshare_rcsr_tbl,
-        table = year, rcsr_tbl = tmp)
-all_parties13 = rbindlist(all_parties13)
-all_parties13[, YEAR := "Y2013"]
+delta_share_rx = get_delta_share(share_rx)
 
-data_221813 = rbind(all_parties18, all_parties22, all_parties13)
+# delta_share_rx = dcast(share_rx,
+#       REGION ~ YEAR,
+#       value.var = c("SHARE")
+#       )[, .(delta2218 =  (Y2022 - Y2018)*100,
+#             delta1813 =  (Y2018 - Y2013)*100,
+#             REGION)]
 
-# now let's build our "final" dataset
-data_221813[, RIGHTWING := filter_right_wing(LISTA)]
-data_221813[, PARTY := filter_minor_parties(LISTA)]
-data_221813[, SHARE := VOTI/VOTERS]
-share_rx = data_221813[RIGHTWING == "MAINSTREAM_RIGHT",
-          .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ]
+# turn22 = get_turnout_by(camera22, is22 = TRUE)
+# turn22 = turn22[,.(REGION, TURN22 = TURNOUT)]
+# turn18 = get_turnout_by(camera18)
+# turn18 = turn18[,.(REGION, TURN18 = TURNOUT)]
+# turn13 = get_turnout_by(camera13)
+# turn13 = turn13[,.(REGION, TURN13 = TURNOUT)]
+# data = inner_join(turn13 , turn18, by = "REGION")
+# data = inner_join(data, turn22, by = "REGION")
 
-share_rx = data_2218[PARTY == "MOVIMENTO 5 STELLE",
-          .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ]
-delta_share_rx = dcast(share_rx,
-      REGION ~ YEAR,
-      value.var = c("SHARE")
-      )[, .(delta2218 =  (Y2022 - Y2018)*100,
-            delta1813 =  (Y2018 - Y2013)*100,
-            REGION)]
+load_all_data_tables()
+# load_18_22_data_tables()
+gtrend = load_gtrends_data()
 
-turn22 = get_turnout_by(camera22, is22 = TRUE)
-turn22 = turn22[,.(REGION, TURN22 = TURNOUT)]
-turn18 = get_turnout_by(camera18)
-turn18 = turn18[,.(REGION, TURN18 = TURNOUT)]
-turn13 = get_turnout_by(camera13)
-turn13 = turn13[,.(REGION, TURN13 = TURNOUT)]
-data = inner_join(delta_share_rx, tmp, by = "REGION")
-data = inner_join(data, turn18, by = "REGION")
-data = inner_join(data, turn22, by = "REGION")
-data = inner_join(data, turn13, by = "REGION")
-data = data[, .(delta2218, delta1813, REGION, RCSR_all_time,
-                delta_turn2218 = 100*(TURN22 - TURN18),
-                delta_turn1813 = 100*(TURN18 - TURN13))]
-data
+set_region_column_camera()
 
+# lista22 = camera22$LISTA |> unique()
+# lista18 = camera18$LISTA |> unique()
+# lista13 = camera13$LISTA |> unique()
+# lista08 = camera08$LISTA |> unique()
+# party_names = filter_minor_parties(
+#     c(lista08, lista13, lista18, lista22)
+# ) |> unique()
 
+party_names = get_party_names()
+party_names = setNames(party_names, party_names)
 
+# make a list with data for all parties
+data_all = lapply(party_names,get_final_dataset_by_party)
 
-data |>
-  ggplot(aes(x = delta_turn2218, y = delta2218, colour = REGION))+
-  geom_point()+
+turn22 = get_turnout_by(camera22, is22 = T)
+
+lega = inner_join(data_all$LEGA, turn22)
+
+# add turnout to the final dataset
+# split functions in organized subfiles
+plot_delta_share_vs_turn_22 <- function(data, party){
+
+  data |>
+    ggplot(aes(x = delta_turn2218, y = delta2218))+
+    geom_point(aes(size = SX_2022))+
+    labs(x = "%Change in Turnout since 2018",
+         y = "%Change in Voteshare since 2018",
+         title = paste0(party," 2022"))+
+    # geom_smooth( method = "lm", se = FALSE)+
+    theme_bw()
+}
+
+plot_delta_share_vs_turn_18 <- function(data, party){
+
+  data |>
+    ggplot(aes(x = delta_turn1813, y = delta1813))+
+    geom_point(aes(size = SX_2022))+
+    labs(x = "%Change in Turnout since 2013",
+         y = "%Change in Voteshare since 2013",
+         title = paste0(party," 2018"))+
+    # geom_smooth( method = "lm", se = FALSE)+
+    theme_bw()
+}
+plot_delta_share_vs_turn_22(data_all$FORZA_ITALIA, "FI")
+plot_delta_share_vs_turn_22(data_all$FRATELLI_D_ITALIA, "FRATELLI D'ITALIA")
+
+data_pd |>
+  ggplot(aes(x = delta_turn2218, y = delta2218))+
+  geom_point(aes(colour = REGION))+
+  geom_smooth( method = "lm", se = FALSE)+
   theme_bw()
 
-data |>
-  ggplot(aes(x = delta_turn1813, y = delta1813, colour = REGION))+
-  geom_point()+
+data_pd |>
+  ggplot(aes(x = delta_turn1813, y = delta1813))+
+  geom_point(aes(colour = REGION))+
+  geom_smooth( method = "lm", se = FALSE)+
   theme_bw()
+
+# data_pd = get_final_dataset_by_party(party = "O")
+#
+# RCSR_2022 = get_rcsr_by_region(gtrend, year = 2022)
+# RCSR_2018 = get_rcsr_by_region(gtrend, year = 2018)
+#
+# data_221813 = get_party_share_all_years()
+# share_rx = get_share_by_region_year(data_221813,
+#                                     party = "MOVIMENTO_5_STELLE")
+# delta_share_rx = get_delta_share(share_rx)
+# turnout = get_turnout_over_years()
+#
+# data = join_by_reg(delta_share_rx, turnout)
+# data = join_by_reg(data, RCSR_2018)
+# data = join_by_reg(data, RCSR_2022)
+#
+# data = data[, .(delta2218, delta1813, REGION, RCSR_2022, RCSR_2018,
+#                 delta_turn2218 = 100*(TURN22 - TURN18),
+#                 delta_turn1813 = 100*(TURN18 - TURN13))]
+
+
+
 
 # tmp = data_2218[PARTY != "O",
-summary(lm(delta2218 ~ delta_turn2218 + RCSR_all_time, data = data))
-summary(lm(delta1813 ~ delta_turn1813 + RCSR_all_time, data = data))
+library(robustbase) # This is needed for lmrob
+summary( lmrob(delta2218 ~ delta_turn2218 + RCSR_2022, data = data_pd) )
+summary( lmrob(delta1813 ~ delta_turn1813 + RCSR_2018, data = data_pd) )
+# lmrob(delta1813 ~ delta_turn1813 + RCSR_all_time, data = data)$coeff
+summary(lm(delta2218 ~ delta_turn2218 + RCSR_2022, data = data_pd))
+summary(lm(delta1813 ~ delta_turn1813 + RCSR_2018, data = data_pd))
 
 
+# let's setup a dataset for estimation
+# year = camera22
+# all_parties22 = lapply(unique(year$LISTA) , get_joint_voteshare_rcsr_tbl,
+#         table = year, rcsr_tbl = tmp)
+# all_parties22 = rbindlist(all_parties22)
+# all_parties22[, YEAR := "Y2022"]
+#
+# year = camera18
+# all_parties18 = lapply(unique(year$LISTA) , get_joint_voteshare_rcsr_tbl,
+#         table = year, rcsr_tbl = tmp)
+# all_parties18 = rbindlist(all_parties18)
+# all_parties18[, YEAR := "Y2018"]
+#
+# year = camera13
+# all_parties13 = lapply(unique(year$LISTA) , get_joint_voteshare_rcsr_tbl,
+#         table = year, rcsr_tbl = tmp)
+# all_parties13 = rbindlist(all_parties13)
+# all_parties13[, YEAR := "Y2013"]
+#
+# data_221813 = rbind(all_parties18, all_parties22, all_parties13)
+#
+# # now let's build our "final" dataset
+# data_221813[, RIGHTWING := filter_right_wing(LISTA)]
+# data_221813[, PARTY := filter_minor_parties(LISTA)]
+# data_221813[, SHARE := VOTI/VOTERS]
 #           .(SHARE = sum(SHARE)), by = .(REGION, YEAR, PARTY) ]
 # join the tables
-full_tbl = inner_join(camera22, gtrend_reg)
+# full_tbl = inner_join(camera22, gtrend_reg)
 data_cor = inner_join(camera22[DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI",
          .(VOTI = sum(VOTILISTA)), by = REGION],
 camera22[DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI",
@@ -184,7 +262,7 @@ diff |>
 tot_vot = camera22[,.(COMUNE, ELETTORITOT, VOTANTITOT, REGION)]
 lm( delta ~ RCSR_all_time, diff) |> summary()
 
-glm( delta ~ RCSR_all_time, data = diff, family = "")
+# glm( delta ~ RCSR_all_time, data = diff, family = "")
 
 
 

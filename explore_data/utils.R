@@ -42,10 +42,10 @@ filter_minor_parties <- function(partylist){
   dplyr::case_match(
     partylist,
     c("LEGA PER SALVINI PREMIER", "LEGA", "LEGA NORD") ~ "LEGA",
-    c("FORZA ITALIA", "IL POPOLO DELLA LIBERTA'") ~ "FORZA ITALIA",
-    c("FRATELLI D'ITALIA", "FRATELLI D'ITALIA CON GIORGIA MELONI") ~ "FRATELLI D'ITALIA",
-    c("PARTITO DEMOCRATICO", "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA") ~ "PARTITO DEMOCRATICO",
-    c("MOVIMENTO 5 STELLE", "MOVIMENTO 5 STELLE BEPPEGRILLO.IT") ~ "MOVIMENTO 5 STELLE",
+    c("FORZA ITALIA", "IL POPOLO DELLA LIBERTA'") ~ "FORZA_ITALIA",
+    c("FRATELLI D'ITALIA", "FRATELLI D'ITALIA CON GIORGIA MELONI") ~ "FRATELLI_D_ITALIA",
+    c("PARTITO DEMOCRATICO", "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA") ~ "PARTITO_DEMOCRATICO",
+    c("MOVIMENTO 5 STELLE", "MOVIMENTO 5 STELLE BEPPEGRILLO.IT") ~ "MOVIMENTO_5_STELLE",
     .default = "O"
   )
 }
@@ -90,28 +90,150 @@ get_turnout_by <- function(DT, is22 = FALSE){
 
 }
 
-get_rcsr_by_region <- function(gtrend){
-  gtrend_reg = copy(gtrend$racecharge_by_region.csv)
-  setnames(gtrend_reg, c("Region", "RCSR_all_time"))
+get_rcsr_by_region <- function(gtrend, year = 2022){
+  if (year == 2022){
+    gtrend_reg = copy(gtrend$gtrends_22.csv)
+  } else {
+    gtrend_reg = copy(gtrend$gtrend_18.csv)
+  }
+  rcsr_col_name = paste0("RCSR_", year)
+  setnames(gtrend_reg, c("Region", rcsr_col_name))
   gtrend_reg = gtrend_reg[, REG := toupper(Region)]
   gtrend_reg[, REGION := stringr::str_extract(REG, '\\w*' )]
-  gtrend_reg = gtrend_reg[REGION != "VALLE", .(REGION, RCSR_all_time)]
+  gtrend_reg = gtrend_reg[REGION != "VALLE", mget(c("REGION", rcsr_col_name))]
   return(gtrend_reg)
 }
 
 
 # join the tables 2018
-get_joint_voteshare_rcsr_tbl <- function(table, rcsr_tbl, list){
+get_joint_voteshare <- function(table, list){
   data_cor = inner_join(table[LISTA == list,
                                  .(VOTI = sum(VOTI_LISTA)), by = REGION],
                         table[LISTA == list,
                                  .(VOTERS = sum(VOTANTI)), by = REGION],
                         by = "REGION")
   # print(data_cor)
-  data_cor = inner_join(data_cor, rcsr_tbl, by = "REGION")
-  data_cor[,.(REGION, VOTI, VOTERS, RCSR_all_time, LISTA = ..list)]
+  # data_cor = inner_join(data_cor, rcsr_tbl, by = "REGION")
+  data_cor[,.(REGION, VOTI, VOTERS, LISTA = ..list)]
 }
 
+get_party_share_all_years <- function(){
+  year = camera22
+  all_parties22 = lapply(unique(year$LISTA) , get_joint_voteshare,
+                         table = year)
+  all_parties22 = rbindlist(all_parties22)
+  all_parties22[, YEAR := "Y2022"]
 
+  year = camera18
+  all_parties18 = lapply(unique(year$LISTA) , get_joint_voteshare,
+                         table = year)
+  all_parties18 = rbindlist(all_parties18)
+  all_parties18[, YEAR := "Y2018"]
 
+  year = camera13
+  all_parties13 = lapply(unique(year$LISTA) , get_joint_voteshare,
+                         table = year)
+  all_parties13 = rbindlist(all_parties13)
+  all_parties13[, YEAR := "Y2013"]
+
+  data_221813 = rbind(all_parties18, all_parties22, all_parties13)
+
+  data_221813[, RIGHTWING := filter_right_wing(LISTA)]
+  data_221813[, PARTY := filter_minor_parties(LISTA)]
+  data_221813[, SHARE := VOTI/VOTERS]
+
+  data_221813
+}
+
+get_share_by_region_year <- function(DT, party = "MAINSTREAM_RIGHT", major_parties = T){
+  if (party == "MAINSTREAM_RIGHT" ){
+    return( DT[RIGHTWING == "MAINSTREAM_RIGHT",
+       .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ] )
+  }
+  if (!major_parties){
+    return(DT[LISTA == party,
+              .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ])
+  }
+  return(DT[PARTY == party,
+          .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ])
+}
+
+get_delta_share <- function(sharedt){
+  delta_share = dcast(sharedt,
+                      REGION ~ YEAR,
+                      value.var = c("SHARE")
+  )[, .(delta2218 =  (Y2022 - Y2018)*100,
+        delta1813 =  (Y2018 - Y2013)*100,
+        SX_2022 = Y2022 * 100,
+        SX_2018 = Y2018 * 100,
+        SX_2013 = Y2013 * 100,
+        REGION)]
+  delta_share
+}
+
+get_turnout_over_years <- function(){
+
+  turn22 = get_turnout_by(camera22, is22 = TRUE)
+  turn22 = turn22[,.(REGION, TURN22 = TURNOUT)]
+  turn18 = get_turnout_by(camera18)
+  turn18 = turn18[,.(REGION, TURN18 = TURNOUT)]
+  turn13 = get_turnout_by(camera13)
+  turn13 = turn13[,.(REGION, TURN13 = TURNOUT)]
+  data = inner_join(turn13 , turn18, by = "REGION")
+  data = inner_join(data, turn22, by = "REGION")
+  data
+}
+
+join_by_reg <- function(DT, table){
+  data = inner_join(DT, table, by = "REGION")
+  data
+}
+
+get_final_dataset_by_party <- function(party = "MAINSTREAM_RIGHT"){
+
+  RCSR_2022 = get_rcsr_by_region(gtrend, year= 2022)
+  RCSR_2018 = get_rcsr_by_region(gtrend, year= 2018)
+
+  data_221813 = get_party_share_all_years()
+  share = get_share_by_region_year(data_221813,
+                                      party = party)
+  delta_share = get_delta_share(share)
+  turnout = get_turnout_over_years()
+
+  data = join_by_reg(delta_share, turnout)
+  data = join_by_reg(data, RCSR_2018)
+  data = join_by_reg(data, RCSR_2022)
+
+  data = data[, .(delta2218, delta1813, REGION, RCSR_2022, RCSR_2018,
+                  SX_2022, SX_2018, SX_2013,
+                  delta_turn2218 = 100*(TURN22 - TURN18),
+                  delta_turn1813 = 100*(TURN18 - TURN13))]
+  data
+}
+
+get_party_names <- function(major_parties = TRUE ,year = "ALL"){
+
+  lista22 = camera22$LISTA |> unique()
+  lista18 = camera18$LISTA |> unique()
+  lista13 = camera13$LISTA |> unique()
+  lista08 = camera08$LISTA |> unique()
+  lista_all = c(lista08, lista13, lista18, lista22)
+
+  if (major_parties) {
+
+    lista22 = filter_minor_parties(lista22 ) |> unique()
+    lista18 = filter_minor_parties(lista18 ) |> unique()
+    lista13 = filter_minor_parties(lista13 ) |> unique()
+    lista08 = filter_minor_parties(lista08 ) |> unique()
+    lista_all = filter_minor_parties(lista_all ) |> unique()
+
+  }
+  switch (as.character(year),
+    "2022" = lista22,
+    "2018" = lista18,
+    "2013" = lista13,
+    "2008" = lista08,
+    "ALL" = lista_all)
+
+}
 
