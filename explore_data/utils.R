@@ -38,6 +38,30 @@ camera22 <<- camera22[ , `:=`(
 )]
 }
 
+set_region_column_senato <- function(){
+
+senato22[, REGION := stringr::str_extract(`CIRC-REG`, '\\w*')]
+senato18[, REGION := stringr::str_extract(REGIONE, '\\w*')]
+senato13[, REGION := stringr::str_extract(REGIONE, '\\w*')]
+senato08[, REGION := stringr::str_extract(REGIONE, '\\w*')]
+
+senato18 <<- senato18[REGION != "AOSTA" & REGION != "TRENTINO", ]
+senato22 <<- senato22[ , `:=`(
+  VOTANTI = VOTANTITOT,
+  ELETTORITOT = ELETTORITOT,
+  LISTA = DESCRLISTA,
+  VOTI_LISTA = VOTILISTA
+)]
+}
+
+set_party_names <- function(DT){
+
+  c = copy(DT)
+  c[, RIGHTWING := filter_right_wing(LISTA)]
+  c[, PARTY := filter_minor_parties(LISTA)]
+
+  return(c)
+}
 filter_minor_parties <- function(partylist){
   dplyr::case_match(
     partylist,
@@ -106,31 +130,40 @@ get_rcsr_by_region <- function(gtrend, year = 2022){
 
 
 # join the tables 2018
-get_joint_voteshare <- function(table, list){
+get_joint_voteshare <- function(table, list, by_comune = FALSE){
   data_cor = inner_join(table[LISTA == list,
                                  .(VOTI = sum(VOTI_LISTA)), by = REGION],
                         table[LISTA == list,
                                  .(VOTERS = sum(VOTANTI)), by = REGION],
-                        by = "REGION")
+                        by = "COMUNE")
+  data_comune = inner_join(table[LISTA == list,
+                                 .(VOTI = sum(VOTI_LISTA)), by = COMUNE],
+                        table[LISTA == list,
+                                 .(VOTERS = sum(VOTANTI)), by = COMUNE],
+                        by = "COMUNE")
   # print(data_cor)
   # data_cor = inner_join(data_cor, rcsr_tbl, by = "REGION")
+  if (by_comune) return(data_comune[,.(COMUNE, REGION, VOTI, VOTERS, LISTA = ..list)])
   data_cor[,.(REGION, VOTI, VOTERS, LISTA = ..list)]
 }
 
-get_party_share_all_years <- function(){
+get_party_share_all_years <- function(senato = FALSE){
   year = camera22
+  if (senato) {year = senato22}
   all_parties22 = lapply(unique(year$LISTA) , get_joint_voteshare,
                          table = year)
   all_parties22 = rbindlist(all_parties22)
   all_parties22[, YEAR := "Y2022"]
 
   year = camera18
+  if (senato) {year = senato18}
   all_parties18 = lapply(unique(year$LISTA) , get_joint_voteshare,
                          table = year)
   all_parties18 = rbindlist(all_parties18)
   all_parties18[, YEAR := "Y2018"]
 
   year = camera13
+  if (senato) {year = senato13}
   all_parties13 = lapply(unique(year$LISTA) , get_joint_voteshare,
                          table = year)
   all_parties13 = rbindlist(all_parties13)
@@ -143,6 +176,9 @@ get_party_share_all_years <- function(){
   data_221813[, SHARE := VOTI/VOTERS]
 
   data_221813
+}
+
+get_share_by_comune_year <- function(DT, party = "MAINSTREAM_RIGHT", major_parties = T){
 }
 
 get_share_by_region_year <- function(DT, party = "MAINSTREAM_RIGHT", major_parties = T){
@@ -171,13 +207,21 @@ get_delta_share <- function(sharedt){
   delta_share
 }
 
-get_turnout_over_years <- function(){
+get_turnout_over_years <- function(senato = FALSE){
 
-  turn22 = get_turnout_by(camera22, is22 = TRUE)
+  year = camera22
+  if (senato) {year = senato22}
+  turn22 = get_turnout_by(year, is22 = TRUE)
   turn22 = turn22[,.(REGION, TURN22 = TURNOUT)]
-  turn18 = get_turnout_by(camera18)
+
+  year = camera18
+  if (senato) {year = senato18}
+  turn18 = get_turnout_by(year)
   turn18 = turn18[,.(REGION, TURN18 = TURNOUT)]
-  turn13 = get_turnout_by(camera13)
+
+  year = camera13
+  if (senato) {year = senato13}
+  turn13 = get_turnout_by(year)
   turn13 = turn13[,.(REGION, TURN13 = TURNOUT)]
   data = inner_join(turn13 , turn18, by = "REGION")
   data = inner_join(data, turn22, by = "REGION")
@@ -189,16 +233,16 @@ join_by_reg <- function(DT, table){
   data
 }
 
-get_final_dataset_by_party <- function(party = "MAINSTREAM_RIGHT"){
+get_final_dataset_by_party <- function(party = "MAINSTREAM_RIGHT", senato = FALSE){
 
   RCSR_2022 = get_rcsr_by_region(gtrend, year= 2022)
   RCSR_2018 = get_rcsr_by_region(gtrend, year= 2018)
 
-  data_221813 = get_party_share_all_years()
+  data_221813 = get_party_share_all_years(senato)
   share = get_share_by_region_year(data_221813,
                                       party = party)
   delta_share = get_delta_share(share)
-  turnout = get_turnout_over_years()
+  turnout = get_turnout_over_years(senato)
 
   data = join_by_reg(delta_share, turnout)
   data = join_by_reg(data, RCSR_2018)
@@ -237,3 +281,27 @@ get_party_names <- function(major_parties = TRUE ,year = "ALL"){
 
 }
 
+get_share_by_comune <- function(DT, list){
+  data_by_comune = inner_join(
+    DT[ LISTA == list, .(VOTI = sum(VOTI_LISTA)), by = .(REGION, COMUNE)],
+    DT[ LISTA == list, .(VOTERS = sum(VOTANTI)), by = .(REGION, COMUNE) ],
+    by = c("REGION", "COMUNE")
+  )[,.(REGION, COMUNE, SHARE = VOTI/VOTERS),]
+}
+
+
+# data_by_comune|>
+#   ggplot(aes(x = SHARE, after_stat(density)))+
+#   geom_density(bounds = c(0, 1), fill = party_color, alpha = .8)+
+#   labs(y = NULL)+
+#   facet_grid(REGION~.)+
+#   theme_minimal()
+
+plot_major_parties_share_distribution <- function(DT){
+
+}
+
+
+party_colors <- c(
+
+)
