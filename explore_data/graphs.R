@@ -4,6 +4,7 @@ library(data.table)
 library(ggplot2)
 library(dplyr)
 library(stringdist)
+library(sf)
 
 load_all_data_tables()
 # load_18_22_data_tables()
@@ -126,7 +127,7 @@ delta_share_rx = get_delta_share(share_rx)
 #             REGION)]
 
 # turn22 = get_turnout_by(camera22, is22 = TRUE)
-# turn22 = turn22[,.(REGION, TURN22 = TURNOUT)]
+  # turn22 = turn22[,.(REGION, TURN22 = TURNOUT)]
 # turn18 = get_turnout_by(camera18)
 # turn18 = turn18[,.(REGION, TURN18 = TURNOUT)]
 # turn13 = get_turnout_by(camera13)
@@ -154,8 +155,11 @@ party_names = setNames(party_names, party_names)
 
 # make a list with data for all parties
 data_all = lapply(party_names,get_final_dataset_by_party, senato = TRUE)
+get_final_dataset_by_party()
+all_yrs = get_party_share_all_years()
 
-turn22 = get_turnout_by(camera22, is22 = T)
+mainstream_right = get_share_by_region_year(all_yrs)
+get_delta_share(mainstream_right)
 
 lega = inner_join(data_all$LEGA, turn22)
 
@@ -310,34 +314,75 @@ lm( delta ~ RCSR_all_time, diff) |> summary()
 
 # glm( delta ~ RCSR_all_time, data = diff, family = "")
 
+# let's build some maps
+map_region = as.data.table(read_sf("data/Limiti01012022_g/Limiti01012022_g/Reg01012022_g/Reg01012022_g_WGS84.shp"))
+map_region[, REGION := stringr::str_extract(toupper(DEN_REG), '\\w*' )]
+turn_data = get_turnout_over_years()
+rcsr_data = get_rcsr_by_region(gtrend, 2022)
 
+data_map = left_join(map_region, turn_data, by = "REGION")
+data_map = left_join(data_map, rcsr_data, by = "REGION")
 
-vot_table = tot_vot[!duplicated(tot_vot),]
-total_Vot_region = vot_table[, .(TOTEL = sum(ELETTORITOT), TOTVOT = sum(VOTANTITOT)), by = REGION]
-total_Vot_region[, TURNOUT := TOTVOT/TOTEL]
+final = get_final_dataset_by_party(party = "MAINSTREAM_RIGHT")
+# final = get_final_dataset_by_party(party = "PARTITO_DEMOCRATICO")
+data_map = left_join(data_map, final, by = "REGION")
 
+data_map |>
+  ggplot()+
+  geom_sf(aes(geometry = geometry, fill = TURN22))+
+  theme_minimal()
 
+data_map[]|>
+  ggplot()+
+  geom_sf(aes(geometry = geometry, fill = delta_turn2218))+
+  scale_fill_gradient(low = "#a50f15" , high = "#f7f7f7")+
+  theme_classic()+
+  theme(axis.text = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank())
 
-(test = get_turnout_by(camera08[order(REGION)]))
-(test2 = get_turnout_by(camera13[order(REGION)]))
-(test3 = get_turnout_by(camera18[order(REGION)]))
+#ffeda0
+#feb24c
+#f03b20::
 
-# turnaout change percentage
-log(test3[REGION != "AOSTA",]$TURNOUT/test2$TURNOUT)*100
-log(test2$TURNOUT/test$TURNOUT)*100
+#f1a340
+#f7f7f7
+#998ec3
+data_map[]|>
+  ggplot()+
+  geom_sf(aes(geometry = geometry, fill = delta2218))+
+  scale_fill_gradient2(low = "#998ec3" , mid = "#f7f7f7", high = "#f1a340")+
+  theme_classic()+
+  theme(axis.text = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank())
 
-# camera18[, REGION := stringr::str_extract(oIRCOSCRIZIONE, '\\w*')]
-# tot_vot = camera18[,.(COMUNE, ELETTORI, VOTANTI, REGION)]
 # vot_table = tot_vot[!duplicated(tot_vot),]
 # total_Vot_region = vot_table[, .(TOTEL = sum(ELETTORITOT), TOTVOT = sum(VOTANTITOT)), by = REGION]
 # total_Vot_region[, TURNOUT := TOTVOT/TOTEL]
-
-total_Vot_region
-# compute fratelli d'italia % by region
-vote_tot_by_region = camera22[, .(TOT_VOTES = sum(VOTILISTA)), by = .(REGION, DESCRLISTA)]
-# [ DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI" ,  ]
-
-full_table = inner_join(tot_vot, vote_tot_by_region)[]# c08 = camera08[, .(TOT_VOTES = sum(VOTI_LISTA)), by = c("REGIONE", "LISTA")]
-# c08[ REGIONE == "PUGLIA", ]
-full_table[DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI",
-           .(REGION, PERCENTAGE = TOT_VOTES / TOTALVOTEREGION  * 100)]
+#
+#
+#
+# (test = get_turnout_by(camera08[order(REGION)]))
+# (test2 = get_turnout_by(camera13[order(REGION)]))
+# (test3 = get_turnout_by(camera18[order(REGION)]))
+#
+# # turnaout change percentage
+# log(test3[REGION != "AOSTA",]$TURNOUT/test2$TURNOUT)*100
+# log(test2$TURNOUT/test$TURNOUT)*100
+#
+# # camera18[, REGION := stringr::str_extract(oIRCOSCRIZIONE, '\\w*')]
+# # tot_vot = camera18[,.(COMUNE, ELETTORI, VOTANTI, REGION)]
+# # vot_table = tot_vot[!duplicated(tot_vot),]
+# # total_Vot_region = vot_table[, .(TOTEL = sum(ELETTORITOT), TOTVOT = sum(VOTANTITOT)), by = REGION]
+# # total_Vot_region[, TURNOUT := TOTVOT/TOTEL]
+#
+# total_Vot_region
+# # compute fratelli d'italia % by region
+# vote_tot_by_region = camera22[, .(TOT_VOTES = sum(VOTILISTA)), by = .(REGION, DESCRLISTA)]
+# # [ DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI" ,  ]
+#
+# full_table = inner_join(tot_vot, vote_tot_by_region)[]# c08 = camera08[, .(TOT_VOTES = sum(VOTI_LISTA)), by = c("REGIONE", "LISTA")]
+# # c08[ REGIONE == "PUGLIA", ]
+# full_table[DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI",
+#            .(REGION, PERCENTAGE = TOT_VOTES / TOTALVOTEREGION  * 100)]

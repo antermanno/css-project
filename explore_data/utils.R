@@ -77,7 +77,7 @@ filter_minor_parties <- function(partylist){
 filter_right_wing_mainstream <- function(partylist){
   dplyr::case_match(
     partylist,
-    c("LEGA", "FORZA ITALIA", "FRATELLI D'ITALIA") ~ "MAINSTREAM_RIGHT",
+    c("LEGA", "FORZA_ITALIA", "FRATELLI_D_ITALIA") ~ "MAINSTREAM_RIGHT",
     .default = "O"
   )
 }
@@ -135,7 +135,7 @@ get_joint_voteshare <- function(table, list, by_comune = FALSE){
                                  .(VOTI = sum(VOTI_LISTA)), by = REGION],
                         table[LISTA == list,
                                  .(VOTERS = sum(VOTANTI)), by = REGION],
-                        by = "COMUNE")
+                        by = "REGION")
   data_comune = inner_join(table[LISTA == list,
                                  .(VOTI = sum(VOTI_LISTA)), by = COMUNE],
                         table[LISTA == list,
@@ -233,16 +233,16 @@ join_by_reg <- function(DT, table){
   data
 }
 
-get_final_dataset_by_party <- function(party = "MAINSTREAM_RIGHT", senato = FALSE){
+get_final_dataset_by_party <- function(party = "MAINSTREAM_RIGHT"){
 
   RCSR_2022 = get_rcsr_by_region(gtrend, year= 2022)
   RCSR_2018 = get_rcsr_by_region(gtrend, year= 2018)
 
-  data_221813 = get_party_share_all_years(senato)
+  data_221813 = get_party_share_all_years()
   share = get_share_by_region_year(data_221813,
                                       party = party)
   delta_share = get_delta_share(share)
-  turnout = get_turnout_over_years(senato)
+  turnout = get_turnout_over_years()
 
   data = join_by_reg(delta_share, turnout)
   data = join_by_reg(data, RCSR_2018)
