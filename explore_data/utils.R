@@ -239,6 +239,7 @@ get_final_dataset_by_party <- function(party = "MAINSTREAM_RIGHT"){
   RCSR_2018 = get_rcsr_by_region(gtrend, year= 2018)
 
   data_221813 = get_party_share_all_years()
+  print(data_221813)
   share = get_share_by_region_year(data_221813,
                                       party = party)
   delta_share = get_delta_share(share)

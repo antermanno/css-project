@@ -154,7 +154,7 @@ party_names = get_party_names()
 party_names = setNames(party_names, party_names)
 
 # make a list with data for all parties
-data_all = lapply(party_names,get_final_dataset_by_party, senato = TRUE)
+data_all = lapply(party_names,get_final_dataset_by_party)
 get_final_dataset_by_party()
 all_yrs = get_party_share_all_years()
 
@@ -357,6 +357,89 @@ data_map[]|>
         axis.line = element_blank(),
         axis.ticks = element_blank())
 
+
+all_yrs = get_party_share_all_years()j
+data_alluvial = all_yrs[REGION == "VENETO", .(SHARE_PARTY = sum(SHARE)), by = .(PARTY, YEAR)][
+  , .(PARTY, SHARE_PARTY,yr = as.integer(stringr::str_extract(YEAR, "\\d+")) )
+]
+
+data_alluviat_tot_vot = all_yrs[, .( VOTI = sum(VOTI),yr = as.integer(stringr::str_extract(YEAR, "\\d+"))), by = .(YEAR, PARTY)]
+
+
+library(ggalluvial)
+
+ggplot(data = data_alluviat_tot_vot,
+       aes(x = yr, y = VOTI, alluvium = PARTY)) +
+  geom_alluvium(aes(fill = PARTY),
+                alpha = .75, decreasing = FALSE) +
+  geom_stratum(aes(stratum = PARTY, fill = PARTY), decreasing = FALSE,
+               width = 1.5)+
+  scale_x_continuous(breaks = c(2013, 2018, 2022)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
+  scale_fill_manual(
+    name = "Party",
+    labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+               "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+    values = c("#3788fd", "#003366", "#97d45f","#fecc3c","#5a5a5a",  "#fe624f"))+
+  # scale_colour_manual(
+  #   name = "Party",
+  #   labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+  #              "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+  #   values = c("#00a2e8", "#003366", "#008000","#ffeb3b","#5a5a5a",  "#e91d24"))+
+  labs(title = "ITALIAN ELECTIONS",
+       x = NULL, y = "VOTES")
+
+ggplot(data = data_alluviat_tot_vot,
+       aes(x = yr, y = VOTI, alluvium = PARTY)) +
+  geom_alluvium(aes(fill = PARTY, colour = PARTY),
+                alpha = .75, decreasing = FALSE) +
+  geom_stratum(aes(stratum = PARTY, fill = PARTY), decreasing = FALSE,
+               width = 1.5)+
+  scale_x_continuous(breaks = c(2013, 2018, 2022)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
+  scale_fill_manual(
+    name = "Party",
+    labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+               "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+    values = c("#3788fd", "#003366", "#97d45f","#5a5a5a","#5a5a5a",  "#5a5a5a"))+
+  scale_colour_manual(
+    name = "Party",
+    labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+               "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+    values = c("#00a2e8", "#003366", "#008000","#5a5a5a","#5a5a5a",  "#5a5a5a"))+
+  labs(title = "ITALIAN ELECTIONS - RIGHT WING COALITION",
+       x = NULL, y = "VOTES")
+
+
+ggplot(data = data_alluviat_tot_vot,
+       aes(x = yr, y = VOTI, alluvium = PARTY)) +
+  geom_alluvium(aes(fill = PARTY),
+                alpha = .75, decreasing = FALSE) +
+  geom_stratum(aes(stratum = PARTY, fill = PARTY), decreasing = FALSE,
+               width = 1.5)+
+  scale_x_continuous(breaks = c(2013, 2018, 2022)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
+  scale_fill_manual(
+    name = "Party",
+    labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+               "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+    values = c("#5a5a5a", "#5a5a5a", "#5a5a5a","#5a5a5a","#c49e62",  "#5a5a5a"))+
+  # scale_colour_manual(
+  #   name = "Party",
+  #   labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+  #              "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+  #   values = c("#5a5a5a", "#5a5a5a", "#5a5a5a","#5a5a5a","#151515",  "#5a5a5a"))+
+  labs(title = "ITALIAN ELECTIONS - INDEPENDENTS",
+       x = NULL, y = "VOTES")
+scale_fill_manual(
+  name = "Party",
+  labels = c("FRATELLI D'ITALIA", "MOVIMENTO 5 STELLE", "PARTITO DEMOCRATICO",
+             "FORZA ITALIA", "LEGA"),
+  values = c("#003366", "#ffeb3b", "#e91d24","#00a2e8","#008000" )
+)
 # vot_table = tot_vot[!duplicated(tot_vot),]
 # total_Vot_region = vot_table[, .(TOTEL = sum(ELETTORITOT), TOTVOT = sum(VOTANTITOT)), by = REGION]
 # total_Vot_region[, TURNOUT := TOTVOT/TOTEL]
