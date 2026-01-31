@@ -153,15 +153,57 @@ set_region_column_senato()
 party_names = get_party_names()
 party_names = setNames(party_names, party_names)
 
+RCSR_2022 = get_rcsr_by_region(gtrend, year = 2022)
+RCSR_2018 = get_rcsr_by_region(gtrend, year = 2018)
 # make a list with data for all parties
-data_all = lapply(party_names,get_final_dataset_by_party)
-get_final_dataset_by_party()
-all_yrs = get_party_share_all_years()
+# data_all = lapply(party_names,get_final_dataset_by_party)
+# by_party = get_final_dataset_by_party()
+# get_final_dataset_by_party(party = "PARTITO_DEMOCRATICO")
 
-mainstream_right = get_share_by_region_year(all_yrs)
-get_delta_share(mainstream_right)
 
-lega = inner_join(data_all$LEGA, turn22)
+all_party_names = c(party_names, MAINSTREAM_RIGHT = "MAINSTREAM_RIGHT")
+graph_party_names = all_party_names[c(2,4,5,7)]
+graph_party_dataset = lapply(graph_party_names, get_final_dataset_by_party)
+graph_party_dataset_add_column = lapply(graph_party_names, function(x){
+  graph_party_dataset[[x]][, .(delta2218, delta_turn2218, REGION, PARTY = x)]
+})
+graph_party_dataset_add_column = rbindlist(graph_party_dataset_add_column)
+graph_party_dataset_add_column = inner_join(graph_party_dataset_add_column, RCSR_2022)
+
+# "#3788fd", "#003366", "#97d45f","#fecc3c","#5a5a5a",  "#fe624f"
+colors = c(MAINSTREAM_RIGHT ="#003366", PARTITO_DEMOCRATICO = "#fe624f",
+           MOVIMENTO_5_STELLE = "#fecc3c", O = "#5a5a5a")
+
+graph_party_dataset_add_column |>
+  ggplot(aes(x = delta_turn2218, y = delta2218, colour = PARTY))+
+  geom_hline(yintercept = 0, size = 1.2)+
+  geom_point()+
+  geom_smooth(se = FALSE, method = "lm")+
+  facet_grid(~PARTY)+
+  theme_bw()+
+  theme(legend.position = "none")+
+  labs(x = "%CHANGE IN TURNOUT",
+       y =  "%CHANGE IN VOTE SHARE")+
+  scale_colour_manual(values = colors)
+
+
+graph_party_dataset_add_column |>
+  ggplot(aes(x = RCSR_2022, y = delta2218, colour = PARTY))+
+  geom_hline(yintercept = 0, size = 1.2)+
+  geom_point()+
+  geom_smooth(se = FALSE, method = "lm")+
+  facet_grid(~PARTY)+
+  theme_bw()+
+  theme(legend.position = "none")+
+  labs(x = "RACIALLY CAHRGED SEARCH RATE",
+       y = "%CHANGE IN VOTE SHARE")+
+  scale_colour_manual(values = colors)
+# all_yrs = get_party_share_all_years()
+#
+# mainstream_right = get_share_by_region_year(all_yrs)
+# get_delta_share(mainstream_right)
+#
+# lega = inner_join(data_all$LEGA, turn22)
 
 # add turnout to the final dataset
 # split functions in organized subfiles
@@ -206,8 +248,8 @@ data_all$FRATELLI_D_ITALIA |>
 camera22[,]
 # data_pd = get_final_dataset_by_party(party = "O")
 #
-# RCSR_2022 = get_rcsr_by_region(gtrend, year = 2022)
-# RCSR_2018 = get_rcsr_by_region(gtrend, year = 2018)
+RCSR_2022 = get_rcsr_by_region(gtrend, year = 2022)
+RCSR_2018 = get_rcsr_by_region(gtrend, year = 2018)
 #
 # data_221813 = get_party_share_all_years()
 # share_rx = get_share_by_region_year(data_221813,
@@ -326,6 +368,19 @@ data_map = left_join(data_map, rcsr_data, by = "REGION")
 final = get_final_dataset_by_party(party = "MAINSTREAM_RIGHT")
 # final = get_final_dataset_by_party(party = "PARTITO_DEMOCRATICO")
 data_map = left_join(data_map, final, by = "REGION")
+data_map = data_map[, RCSR := RCSR_2022.x]
+
+data_map |>
+  ggplot()+
+  geom_sf(aes(geometry = geometry, fill = RCSR))+
+  theme_minimal()+
+  scale_fill_gradient(low = "#f7f7f7", high =  "#a50f15")+
+  theme(axis.text = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank()
+        )+
+  labs(title = "RACIALLY CHARGED SEARCH RATE BY REGION - 2005/2022")
+
 
 data_map |>
   ggplot()+
@@ -358,7 +413,7 @@ data_map[]|>
         axis.ticks = element_blank())
 
 
-all_yrs = get_party_share_all_years()j
+all_yrs = get_party_share_all_years()
 data_alluvial = all_yrs[REGION == "VENETO", .(SHARE_PARTY = sum(SHARE)), by = .(PARTY, YEAR)][
   , .(PARTY, SHARE_PARTY,yr = as.integer(stringr::str_extract(YEAR, "\\d+")) )
 ]
@@ -368,15 +423,17 @@ data_alluviat_tot_vot = all_yrs[, .( VOTI = sum(VOTI),yr = as.integer(stringr::s
 
 library(ggalluvial)
 
+options(scipen = 9999)
 ggplot(data = data_alluviat_tot_vot,
        aes(x = yr, y = VOTI, alluvium = PARTY)) +
   geom_alluvium(aes(fill = PARTY),
                 alpha = .75, decreasing = FALSE) +
   geom_stratum(aes(stratum = PARTY, fill = PARTY), decreasing = FALSE,
-               width = 1.5)+
+               width = 0.3)+
   scale_x_continuous(breaks = c(2013, 2018, 2022)) +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0),
+        axis.text = element_blank()) +
   scale_fill_manual(
     name = "Party",
     labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
@@ -388,29 +445,7 @@ ggplot(data = data_alluviat_tot_vot,
   #              "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
   #   values = c("#00a2e8", "#003366", "#008000","#ffeb3b","#5a5a5a",  "#e91d24"))+
   labs(title = "ITALIAN ELECTIONS",
-       x = NULL, y = "VOTES")
-
-ggplot(data = data_alluviat_tot_vot,
-       aes(x = yr, y = VOTI, alluvium = PARTY)) +
-  geom_alluvium(aes(fill = PARTY, colour = PARTY),
-                alpha = .75, decreasing = FALSE) +
-  geom_stratum(aes(stratum = PARTY, fill = PARTY), decreasing = FALSE,
-               width = 1.5)+
-  scale_x_continuous(breaks = c(2013, 2018, 2022)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
-  scale_fill_manual(
-    name = "Party",
-    labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
-               "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
-    values = c("#3788fd", "#003366", "#97d45f","#5a5a5a","#5a5a5a",  "#5a5a5a"))+
-  scale_colour_manual(
-    name = "Party",
-    labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
-               "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
-    values = c("#00a2e8", "#003366", "#008000","#5a5a5a","#5a5a5a",  "#5a5a5a"))+
-  labs(title = "ITALIAN ELECTIONS - RIGHT WING COALITION",
-       x = NULL, y = "VOTES")
+       x = NULL, y = "TOTAL VOTES")
 
 
 ggplot(data = data_alluviat_tot_vot,
@@ -418,10 +453,36 @@ ggplot(data = data_alluviat_tot_vot,
   geom_alluvium(aes(fill = PARTY),
                 alpha = .75, decreasing = FALSE) +
   geom_stratum(aes(stratum = PARTY, fill = PARTY), decreasing = FALSE,
-               width = 1.5)+
+               width = 0.3)+
   scale_x_continuous(breaks = c(2013, 2018, 2022)) +
   theme_bw() +
-  theme(axis.text.x = element_text(angle = -30, hjust = 0)) +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0),
+        axis.text = element_blank()) +
+  scale_fill_manual(
+    name = "Party",
+    labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+               "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+    values = c("#3788fd", "#003366", "#97d45f","#5a5a5a","#5a5a5a",  "#5a5a5a"))+
+  # scale_colour_manual(
+  #   name = "Party",
+  #   labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
+  #              "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
+  #   values = c("#00a2e8", "#003366", "#008000","#ffeb3b","#5a5a5a",  "#e91d24"))+
+  labs(title = "ITALIAN ELECTIONS",
+       x = NULL, y = "TOTAL VOTES")
+
+
+
+ggplot(data = data_alluviat_tot_vot,
+       aes(x = yr, y = VOTI, alluvium = PARTY)) +
+  geom_alluvium(aes(fill = PARTY),
+                alpha = .75, decreasing = FALSE) +
+  geom_stratum(aes(stratum = PARTY, fill = PARTY), decreasing = FALSE,
+               width = 0.3)+
+  scale_x_continuous(breaks = c(2013, 2018, 2022)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = -30, hjust = 0),
+        axis.text = element_blank()) +
   scale_fill_manual(
     name = "Party",
     labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
@@ -431,15 +492,20 @@ ggplot(data = data_alluviat_tot_vot,
   #   name = "Party",
   #   labels = c("FORZA ITALIA", "FRATELLI D'ITALIA", "LEGA",
   #              "MOVIMENTO 5 STELLE", "OTHER", "PARTITO DEMOCRATICO"),
-  #   values = c("#5a5a5a", "#5a5a5a", "#5a5a5a","#5a5a5a","#151515",  "#5a5a5a"))+
-  labs(title = "ITALIAN ELECTIONS - INDEPENDENTS",
-       x = NULL, y = "VOTES")
-scale_fill_manual(
-  name = "Party",
-  labels = c("FRATELLI D'ITALIA", "MOVIMENTO 5 STELLE", "PARTITO DEMOCRATICO",
-             "FORZA ITALIA", "LEGA"),
-  values = c("#003366", "#ffeb3b", "#e91d24","#00a2e8","#008000" )
-)
+  #   values = c("#00a2e8", "#003366", "#008000","#ffeb3b","#5a5a5a",  "#e91d24"))+
+  labs(title = "ITALIAN ELECTIONS",
+       x = NULL, y = "TOTAL VOTES")
+
+
+gtrend$rcsr_italy_0522.csv |>
+  ggplot(aes(x = Time, y = RCSR))+
+  geom_hline(yintercept = mean(gtrend$rcsr_italy_0522.csv$RCSR), color = "#1e2a32",
+             size = 1)+
+  geom_line(col ="#c15546", size = 0.7)+
+  theme_minimal()+
+  labs(x = NULL, title = "OVER TIME - ITALY",
+       y = NULL)
+
 # vot_table = tot_vot[!duplicated(tot_vot),]
 # total_Vot_region = vot_table[, .(TOTEL = sum(ELETTORITOT), TOTVOT = sum(VOTANTITOT)), by = REGION]
 # total_Vot_region[, TURNOUT := TOTVOT/TOTEL]
