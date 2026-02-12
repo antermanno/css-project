@@ -55,16 +55,20 @@ pd_ = get_share_by_comune(camera18, list = "PARTITO DEMOCRATICO")
 dat = set_party_names(camera18)
 
 
-# data_by_comune_fi = inner_join(
-# camera22[ LISTA == list, .(VOTI = sum(VOTI_LISTA)), by = .(REGION, COMUNE)],
-# camera22[ LISTA == list, .(VOTERS = sum(VOTANTI)), by = .(REGION, COMUNE) ]
-# )[,.(REGION, COMUNE, SHARE = VOTI/VOTERS)]
-#
-# data_by_comune_fi|>
-#   ggplot(aes(x = SHARE, fill = REGION, after_stat(density)))+
-#   geom_density(bounds = c(0, 1))+
-#   facet_grid(REGION~.)+
-#   theme_minimal()
+list = "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA"
+data_by_comune_fi = inner_join(
+camera22[ LISTA == list, .(VOTI = sum(VOTI_LISTA)), by = .(REGION, COMUNE)],
+camera22[ LISTA == list, .(VOTERS = sum(VOTANTI)), by = .(REGION, COMUNE) ]
+)[,.(REGION, COMUNE, SHARE = VOTI/VOTERS)]
+
+data_by_comune_fi|>
+  ggplot(aes(x = SHARE, after_stat(density)))+
+  geom_density(bounds = c(0, 1), fill = "grey")+
+  # facet_grid(REGION~.)+
+  theme_minimal()+
+  theme(axis.text.y = element_blank(),
+        legend.position = "none")+
+  labs()
 
 
 Fn = ecdf(data_by_comune_fi$SHARE)

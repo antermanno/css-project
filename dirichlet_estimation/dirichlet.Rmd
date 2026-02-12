@@ -1,0 +1,121 @@
+---
+title: "simple_nuts"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+py_require(packages = c("numpyro"))
+```
+
+
+Generate the data - this is the model of electoral data proposed in the paper ...
+```{r}
+library(MCMCpack)
+library(ggplot2)
+# library(reshape2)
+
+# Set alpha parameters
+alpha <- c(5, 5, 5)
+
+# Generate 500 samples
+samples <- rdirichlet(500, alpha)
+```
+
+Let's simulate data for a region.
+```{r}
+# Burgland region
+set.seed(123)
+# real actractiveness params for the region (alphas)
+# 4 parties model
+act_burg <- c(0.4, 1, 3, 4)
+
+# burgland has 700 electoral districts
+n_electoral <- 700
+
+# get the electoral results
+bur_prop <- as.data.frame(rdirichlet(n_electoral, act_burg))
+party_names <- c("alpha_party", "beta_party", "gamma_party", "others")
+colnames(bur_prop) <- party_names
+```
+
+
+# let's plot parties marginal performance.
+```{r}
+# for party 1 and 3
+bur_prop |> 
+  ggplot(aes(x = alpha_party))+
+  geom_density()+
+  theme_bw()
+```
+
+
+```{r}
+# for party 1 and 3
+bur_prop |> 
+  ggplot(aes(x = gamma_party))+
+  geom_density()+
+  theme_bw()
+```
+
+# Let's build a toy dataset for the entire nation
+
+Simulate 20 different regions with 20 different sizes (# electoral districts).
+```{r}
+n_regions <- 10
+
+n_district_by_region <- rbinom(n_regions, 500, 0.3)
+region_id <- factor(1:n_regions)
+
+# party_national_performance (kinda)
+national_alpha = c(0.4, 1, 3, 4)
+alpha_by_region <- lapply(national_alpha, function(alpha){
+  as.numeric(alpha + pmax(rnorm(n_regions, sd = 2), 0))
+})
+
+actractiveness_by_region <- as.data.frame(alpha_by_region)
+colnames(actractiveness_by_region) <- party_names
+```
+
+Now for each region sample the electoral district vote share distribution:
+```{r}
+data = data.frame()
+for (i in 1:n_regions){
+  n = n_district_by_region[i]
+  alpha = as.numeric(actractiveness_by_region[i,] )
+  print(c(n, alpha))
+  vote_share = rdirichlet(n, alpha) 
+  vote_share <- as.data.frame(vote_share)
+  colnames(vote_share) <- party_names
+  vote_share$region = region_id[i]
+  data <- rbind(data,vote_share)
+}
+```
+
+plot some of the vote share distribution
+```{r}
+data |> 
+  ggplot(aes(x = alpha_party))+
+  geom_density()+
+  facet_wrap(.~region)+
+  theme_bw()
+```
+
+```{r}
+data |> 
+  ggplot(aes(x = gamma_party))+
+  geom_density()+
+  facet_wrap(.~region)+
+  theme_bw()
+```
+
+
+# Now let's find a way to estimate the data by region.
+
+
+
+
+
+
+
+
