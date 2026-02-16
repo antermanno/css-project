@@ -1,16 +1,16 @@
 #' load the last years raw data.tables
 load_all_data_tables <- function(){
-  camera22 <<- data.table::fread("data/camera-20220925/Camera_Italia_LivComune.csv")
-  senato22 <<- data.table::fread("data/senato-20220925/Senato_Italia_LivComune.csv")
+  camera22 <<- data.table::fread("../data/camera-20220925/Camera_Italia_LivComune.csv")
+  senato22 <<- data.table::fread("../data/senato-20220925/Senato_Italia_LivComune.csv")
 
-  camera18 <<- data.table::fread("data/camera-20180304/Camera2018_livComune.txt")
-  senato18 <<- data.table::fread("data/senato-20180304/Senato2018_livComune.txt")
+  camera18 <<- data.table::fread("../data/camera-20180304/Camera2018_livComune.txt")
+  senato18 <<- data.table::fread("../data/senato-20180304/Senato2018_livComune.txt")
 
-  camera13 <<- data.table::fread("data/camera-20130224/camera_italia-20130224.txt")
-  senato13 <<- data.table::fread("data/senato-20130224/senato_italia-20130224.txt")
+  camera13 <<- data.table::fread("../data/camera-20130224/camera_italia-20130224.txt")
+  senato13 <<- data.table::fread("../data/senato-20130224/senato_italia-20130224.txt")
 
-  camera08 <<- data.table::fread("data/camera-20080413/camera_italia-20080413.txt")
-  senato08 <<- data.table::fread("data/senato-20080413/senato_italia-20080413.txt")
+  camera08 <<- data.table::fread("../data/camera-20080413/camera_italia-20080413.txt")
+  senato08 <<- data.table::fread("../data/senato-20080413/senato_italia-20080413.txt")
 }
 
 #' load the last two election relevant data.tables
@@ -29,12 +29,14 @@ camera18[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 camera13[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 camera08[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 
-camera18 <<- camera18[REGION != "AOSTA", ]
+camera13 <<- camera18[, COLLEGIO := COMUNE]
+camera18 <<- camera18[REGION != "AOSTA", COLLEGIO := COLLEGIOUNINOMINALE]
 camera22 <<- camera22[ , `:=`(
   VOTANTI = VOTANTITOT,
-  ELETTORITOT = ELETTORITOT,
+  ELETTORI = ELETTORITOT,
   LISTA = DESCRLISTA,
-  VOTI_LISTA = VOTILISTA
+  VOTI_LISTA = VOTILISTA,
+  COLLEGIO = COLLUNINOM
 )]
 }
 
@@ -48,9 +50,10 @@ senato08[, REGION := stringr::str_extract(REGIONE, '\\w*')]
 senato18 <<- senato18[REGION != "AOSTA" & REGION != "TRENTINO", ]
 senato22 <<- senato22[ , `:=`(
   VOTANTI = VOTANTITOT,
-  ELETTORITOT = ELETTORITOT,
+  ELETTORI = ELETTORITOT,
   LISTA = DESCRLISTA,
-  VOTI_LISTA = VOTILISTA
+  VOTI_LISTA = VOTILISTA,
+  COLLEGIO = COLLUNINOM
 )]
 }
 
@@ -298,11 +301,20 @@ get_share_by_comune <- function(DT, list){
 #   facet_grid(REGION~.)+
 #   theme_minimal()
 
-plot_major_parties_share_distribution <- function(DT){
 
+get_vote_share_by_comune_by_party <- function(DT){
+  unique(DT[,.(PARTY = filter_minor_parties(LISTA),
+        VOTI_LISTA, COLLEGIO, REGION, ELETTORI)][
+          , .(SHARE = sum(VOTI_LISTA)/ELETTORI, REGION),
+          by= .(PARTY, COLLEGIO, ELETTORI)])[
+            , .(ABSTENTION = 1 - sum(SHARE),
+                PARTY, SHARE, REGION), by = .(ELETTORI, COLLEGIO)]
 }
 
+party_abs_vote_share_by_comune <- function(DT){
+  get_vote_share_by_comune_by_party(DT)
 
-party_colors <- c(
-
-)
+  dcast(get_vote_share_by_comune_by_party(DT),
+        ELETTORI + COLLEGIO + REGION + ABSTENTION ~ PARTY,
+        value.var = "SHARE")[]
+}
