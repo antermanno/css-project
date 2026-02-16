@@ -1,0 +1,157 @@
+---
+title: "simple_nuts"
+output: html_document
+---
+
+```{r}
+library(reticulate)
+py_require(packages = c("numpyro",
+                        "graphviz",
+                        "blackjax",
+                        "IPython"))
+```
+
+
+Generate the data - this is the model of electoral data proposed in the paper ...
+```{r}
+library(MCMCpack)
+library(ggplot2)
+
+set.seed(42)
+
+jnp = import("jax.numpy", as = "jnp")
+# library(reshape2)
+
+# Set alpha parameters
+alpha <- c(5, 5, 5, 5)
+
+# Generate 500 samples
+samples <- jnp$array(rdirichlet(2000, alpha))
+```
+
+```{python}
+from jax import random, vmap
+import jax.numpy as jnp
+from jax.scipy.special import logsumexp
+
+import numpyro
+from numpyro import handlers
+from numpyro.diagnostics import hpdi
+import numpyro.distributions as dist
+from numpyro.infer import MCMC, NUTS
+
+import numpy as np
+
+# def model_simple(obs = None, N = None):
+#     
+#     # with numpyro.plate("reg", 3):
+#     a_reg = numpyro.sample("a_reg", dist.Dirichlet(jnp.ones((1,4))))
+#     
+#     with numpyro.plate("data", N):
+#       numpyro.sample("obs", dist.Dirichlet(a_reg), obs = obs)
+      
+
+def model_region(obs = None, N = None):
+    
+    with numpyro.plate("party", 4):
+      a = numpyro.sample("a", dist.HalfNormal(2))
+      
+    with numpyro.plate("data", N):
+      numpyro.sample("obs", dist.Dirichlet(a), obs = obs)
+        
+# def model_simple(obs = None, N = None):
+#     
+#     with numpyro.plate("party", 4):
+#       a_party = numpyro.sample("a_party", dist.Dirichlet(jnp.ones((1,4))))
+#     
+#     
+#     print(a_party.shape)
+#     with numpyro.plate("data", N):
+#       numpyro.sample("obs", dist.Dirichlet(a_party), obs = obs)
+```
+
+
+try moving the simple model to blackjax
+```{python}
+from numpyro.infer.util import initialize_model
+
+rng_key = random.key(42)
+
+rng_key, init_key = random.split(rng_key)
+
+init_params, potential_fn_gen, *_ = initialize_model(init_key, model_region, model_args=(r.samples, r.samples.shape[0]), dynamic_args=True, )
+```
+
+
+Now let's implement blackjax thingy
+
+Convert it to a logdensity function:
+```{python}
+from jax import jit
+
+logdensity_fn = lambda position: -potential_fn_gen(r.samples,r.samples.shape[0] )(position)
+logdensity_jit = jit(logdensity_fn)
+initial_position = init_params.z
+```
+
+blackjax time
+```{python}
+import blackjax
+
+# inv_mass_length = initial_position.values()
+
+inv_mass_matrix = jnp.ones(4)
+step_size = 1e-3
+
+nuts = blackjax.nuts(logdensity_jit, step_size, inv_mass_matrix)
+init_state = nuts.init(initial_position)
+kernel = nuts.step
+
+```
+
+
+Define the inference loop
+```{python}
+import jax
+
+def inference_loop(rng_key, kernel, initial_state, num_samples):
+  @jax.jit
+  def one_step(state, rng_key):
+      state, _ = kernel(rng_key, state)
+      return state, state
+
+  keys = jax.random.split(rng_key, num_samples)
+  _, states = jax.lax.scan(one_step, initial_state, keys)
+
+  return states
+```
+
+Run the algo:
+```{python}
+rng_key, sample_key = random.split(rng_key)
+states = inference_loop(sample_key, kernel, init_state, 10000)
+
+mcmc_samples = states.position
+```
+
+
+```{r}
+np = import("numpy", as = "np")
+output = np$array(py$mcmc_samples$a)
+
+library(ggplot2)
+output |> 
+  as.data.frame() |> 
+  ggplot()+
+  geom_density(aes(x = V1, fill = "V1"))+
+  geom_density(aes(x = V2, fill = "v2"))+
+  geom_density(aes(x = V3, fill = "v3"))+
+  geom_density(aes(x = V4, fill = "v4"))+
+  theme_bw()
+```
+
+# sample analysis
+```{r}
+c(apply(output, 2, median) * 3, alpha)
+```
+

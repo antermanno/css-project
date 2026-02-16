@@ -1,0 +1,8 @@
+digraph {
+	a [label=a fillcolor=white shape=ellipse style=filled]
+	subgraph cluster_data {
+		label=data labeljust=r labelloc=b
+		obs [label=obs fillcolor=grey shape=ellipse style=filled]
+	}
+	a -> obs
+}
