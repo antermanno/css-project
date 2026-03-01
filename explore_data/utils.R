@@ -91,8 +91,8 @@ filter_right_wing <- function(partylist){
 
 # load data from the gtrends folder
 load_gtrends_data <- function(){
-  files = list.files(path = "data/gtrends/")
-  files = sapply(files, function(x) paste0("data/gtrends/", x))
+  files = list.files(path = "../data/gtrends/")
+  files = sapply(files, function(x) paste0("../data/gtrends/", x))
   lapply((files), data.table::fread)
 }
 
@@ -304,17 +304,17 @@ get_share_by_comune <- function(DT, list){
 
 get_vote_share_by_comune_by_party <- function(DT){
   unique(DT[,.(PARTY = filter_minor_parties(LISTA),
-        VOTI_LISTA, COLLEGIO, REGION, ELETTORI)][
-          , .(SHARE = sum(VOTI_LISTA)/ELETTORI, REGION),
-          by= .(PARTY, COLLEGIO, ELETTORI)])[
-            , .(ABSTENTION = 1 - sum(SHARE),
-                PARTY, SHARE, REGION), by = .(ELETTORI, COLLEGIO)]
+        VOTI_LISTA, COLLEGIO, REGION, ELETTORI, COMUNE, VOTANTI)][
+          , .(SHARE = sum(VOTI_LISTA)/ELETTORI, REGION, ABSTENTION = 1 - VOTANTI/ELETTORI),
+          by= .(PARTY, COLLEGIO, ELETTORI, COMUNE)])#[
+            # , .(ABSTENTION = 1 - sum(SHARE),
+            #     PARTY, SHARE, REGION), by = .(ELETTORI, COLLEGIO)]
 }
 
 party_abs_vote_share_by_comune <- function(DT){
   get_vote_share_by_comune_by_party(DT)
 
   dcast(get_vote_share_by_comune_by_party(DT),
-        ELETTORI + COLLEGIO + REGION + ABSTENTION ~ PARTY,
+        ELETTORI + COLLEGIO + REGION + COMUNE + ABSTENTION ~ PARTY,
         value.var = "SHARE")[]
 }

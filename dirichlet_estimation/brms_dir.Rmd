@@ -1,0 +1,76 @@
+---
+title: "brms_dirichlet"
+author: "Ermanno Antonucci"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Let's try the brms package:
+```{r}
+library(brms)
+library(dplyr)
+bind <- function(...) cbind(...)
+
+N <- 20
+
+df <- data.frame(
+  y1 = rbinom(N, 10, 0.5), y2 = rbinom(N, 10, 0.7), 
+  y3 = rbinom(N, 10, 0.9), x = rnorm(N)
+) %>%
+  mutate(
+    size = y1 + y2 + y3,
+    y1 = y1 / size,
+    y2 = y2 / size,
+    y3 = y3 / size
+  )
+df$y <- with(df, cbind(y1, y2, y3))
+
+df$region = factor(rep(1:4, 5))
+
+
+make_stancode(bf(bind(y1, y2, y3) ~ ., muy2 ~ x, muy3 ~ (1|region)), df, dirichlet())
+make_standata(bind(y1, y2, y3) ~ x + (1 | region), df, dirichlet())
+
+
+#found the setting
+fit <- brm(bf(bind(y1, y2, y3) ~ ., muy2 ~ x, muy3 ~ (1|region)), df, dirichlet())
+
+plot(predict(fit, newdata = df[1,]))
+
+```
+```{r}
+
+library(brms)
+library(dplyr)
+bind <- function(...) cbind(...)
+
+N = 20
+
+df <- data.frame(
+  A = rbinom(N, 10, 0.5), B = rbinom(N, 10, 0.7), 
+  C = rbinom(N, 10, 0.9), x = rnorm(N),
+  cat = rep(1:4, 5)
+) %>%
+  mutate(
+    size = A + B + C,
+    A = A / size,
+    B = B / size,
+    C = C / size
+  )
+
+df$y <- with(df, cbind(A, B, C))
+
+make_stancode(bf(y ~x + (1|cat)),
+              data = df, 
+              family = dirichlet())
+make_standata(bf(A ~ x + (1|cat), sigma ~ (1|cat)),
+              data = df, 
+              family = gaussian())
+make_standata(bind(y1, y2, y3) ~ x + (1 | region), df, dirichlet())
+
+fit <- brm(bformula, df, dirichlet())
+
+summary(fit)
+
+```
+

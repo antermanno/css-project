@@ -6,7 +6,10 @@ output: html_document
 ```{r}
 library(reticulate)
 library(data.table)
+library(dplyr)
 library(ggplot2)
+library(DirichletReg)
+library(compositions)
 py_require(packages = c("numpyro",
                         "blackjax",
                         "IPython"))
@@ -32,16 +35,25 @@ load_all_data_tables()
 #perform some cleaning for the names
 set_region_column_camera()
 set_region_column_senato()
+
+camera22[COLLEGIO == "PIEMONTE 2 - U02 (NOVARA)", .(filter_minor_parties(LISTA), VOTI_LISTA, ELETTORI)]
 ```
 
 Get the share of each party of interest in each electoral station and abstension (1 - turnout). Abstension will be modelled as a party. 
 It is relevant as Italian elections experienced a strong decrease in turnout in recent elections.
 ```{r}
 data22 <- party_abs_vote_share_by_comune(camera22)
+# parties = data22[,-c(1,2,3,4)] |> names()
 data18 <- party_abs_vote_share_by_comune(camera18)
 data13 <- party_abs_vote_share_by_comune(camera13)
 
-data22
+data18 <- data18[-316]
+data13 <- data18[-316]
+# over_share22 = (data22[,-c(1,2,3,4)] |> apply(1, sum) > 1) |> which()
+# over_share18 = (data18[,-c(1,2,3,4)] |> apply(1, sum) > 1) |> which()
+# over_share13 = (data13[,-c(1,2,3,4)] |> apply(1, sum) > 1) |> which()
+
+camera13[COLLEGIO == "09 - PINEROLO" & COMUNE == "SAUZE DI CESANA", .(PARTY = filter_minor_parties(LISTA), VOTI_LISTA, ELETTORI)]
 ```
 
 Let's visualize our data:
@@ -71,7 +83,7 @@ data22[REGION == "EMILIA" | REGION == "VENETO"] |>
 ```
 
 Or even for Abstension:
-```{r}
+```{r eval=FALSE, include=FALSE}
 data22[REGION == "EMILIA" | REGION == "VENETO"] |> 
   ggplot(aes(x = ABSTENTION))+
   geom_density(alpha = 0.7, fill = "brown2")+
@@ -83,7 +95,245 @@ data22[REGION == "EMILIA" | REGION == "VENETO"] |>
 ```
 
 
-# Now let's find a way to estimate the data by region.
+beware of observation 316.
+
+Let's fit using the dirichletReg package
+
+Let's try to fit the dirichlet by region first:
+```{r}
+gtrend = load_gtrends_data()
+rcsr = get_rcsr_by_region(gtrend, year = 2018)
+
+# Timestep is parliamentary cycle:
+
+data13$year = 0
+data18$year = 1
+data22$year = 2
+
+# Create the "treatment" overtly far right communication variable for 
+# the parties "LEGA" and "FRATELLI_D_ITALIA" (LEGA before 2018 election and fratelli before 2018)
+
+data13$treat_lega = 0
+data18$treat_lega = 1
+data22$treat_lega = 1
+
+data13$treat_frat = 0
+data18$treat_frat = 0
+data22$treat_frat = 1
+
+# include encoding for incumbency for all big parties
+# pdl (same as forza italia) was in government with the league. Members of fi where also part of the goverment in the "super party" pdl
+inc13 = data.frame(inc_pd = 0, inc_m5s = 0, inc_lega = 1, inc_fd = 1, inc_fi = 1)
+# forza italia made a short lived government alliance with the center left, that's why it is included in the incumbency for 2018
+inc18 = data.frame(inc_pd = 1, inc_m5s = 0, inc_lega = 0, inc_fd = 0, inc_fi = 1)
+# the only party who didn't take part into the government coalition was fratelli d'italia
+inc22 = data.frame(inc_pd = 1, inc_m5s = 1, inc_lega = 1, inc_fd = 0, inc_fi = 1)
+
+data13_inc = cbind(data13, inc13)
+data18_inc = cbind(data18, inc18)
+data22_inc = cbind(data22, inc22)
+
+
+
+data_inc = rbind(data13_inc, data18_inc, data22_inc)
+
+# data_inc <- data_inc[REGION == "EMILIA",]
+# data_inc <- data22_inc
+
+data_inc |> names()
+
+# conflict with the data.table class, change it
+class(data_inc) <- class(data_inc)[2]
+
+# change the names so that they comply with brms param names
+data_inc$PD = data_inc$PARTITO_DEMOCRATICO
+data_inc$M5S = data_inc$MOVIMENTO_5_STELLE
+data_inc$FRI = data_inc$FRATELLI_D_ITALIA
+data_inc$FI = data_inc$FORZA_ITALIA
+
+data_inc$REGION = factor(data_inc$REGION)
+
+
+tmp <- with(data_inc, cbind(FI, FRI,LEGA, M5S , O, PD, ABSTENTION))
+
+# use the DirichletReg conversion function to make sure data fits onto the simplex.
+tmp <- DR_data(tmp)
+data_inc$prop = as.matrix(tmp)
+
+
+```
+
+Fit Dir using the composition library
+```{r}
+# library(compositions) 
+
+
+# function for estimating dirichlet params by region given datasets
+
+get_actractiveness_dt <- function(DT, ...){
+  
+  
+  
+  fitted = lapply(unique(DT$REGION), function(reg){
+    param = fitDirichlet(DT[REGION == reg, .(ABSTENTION, FORZA_ITALIA,
+                                             FRATELLI_D_ITALIA, LEGA,
+                                             MOVIMENTO_5_STELLE, O,
+                                             PARTITO_DEMOCRATICO)])
+    data.frame(alpha = param$alpha, REGION = reg, PARTY = ...)
+  })
+  
+  
+  rbindlist(fitted)
+}
+
+party_names = c("ABS", "FI", "FDI", "LEGA", "M5S", "OTH", "PD")
+
+al13 = get_actractiveness_dt(data13, PARTY = party_names, year = 0)
+al18 = get_actractiveness_dt(data18, PARTY = party_names, year = 1)
+al22 = get_actractiveness_dt(data22, PARTY = party_names, year = 2)
+
+data_alpha = rbind(al13, al18, al22)
+
+```
+
+
+Now join with the auxiliary variables:
+```{r}
+#reduced dataset for the join
+# names(data_inc)
+# [1] "ELETTORI"            "COLLEGIO"            "REGION"              "COMUNE"             
+#  [5] "ABSTENTION"          "FORZA_ITALIA"        "FRATELLI_D_ITALIA"   "LEGA"               
+#  [9] "MOVIMENTO_5_STELLE"  "O"                   "PARTITO_DEMOCRATICO" "year"               
+# [13] "treat_lega"          "treat_frat"          "inc_pd"              "inc_m5s"            
+# [17] "inc_lega"            "inc_fd"              "inc_fi"              "PD"                 
+# [21] "M5S"                 "FRI"                 "FI"                  "prop"  
+
+tmp = data_alpha |> 
+  mutate(M = if_else( (PARTY == "LEGA" & year > 0) | (PARTY == "FDI" & year > 1), 1, 0),
+         inc = case_when(
+           PARTY == "PD" & (year == 1 | year == 2) ~ 1 ,
+           PARTY == "M5S" & year == 2 ~ 1 ,
+           PARTY == "FI" ~ 1 ,
+           PARTY == "FDI" & year == 0 ~ 1 ,
+           PARTY == "PD" & (year == 0 | year == 2) ~ 1 ,
+           .default = 0
+         ))
+
+data_1 = inner_join(tmp, rcsr, by = "REGION")
+  
+library(lme4)
+fit_1= lmer(log(alpha) ~ (1 | REGION:PARTY) + (1 | PARTY:year) + M + inc + RCSR_2018:M , data_1, REML = FALSE)
+fit_2= lmer(log(alpha) ~ (1 | REGION:PARTY) + (1 | PARTY:year) + M + inc  , data_1, REML = FALSE)
+
+anova(fit_2, fit_1)
+summary(fit)
+```
+
+
+Now try the model where the "treatment variable" is the switch in comunication rather than the comunication itself.
+```{r}
+
+data_inc_2 = data_alpha |> 
+  mutate(M = if_else( (PARTY == "LEGA" & year == 1) | (PARTY == "FDI" & year == 2), 1, 0),
+         inc = case_when(
+           PARTY == "PD" & (year == 1 | year == 2) ~ 1 ,
+           PARTY == "M5S" & year == 2 ~ 1 ,
+           PARTY == "FI" ~ 1 ,
+           PARTY == "FDI" & year == 0 ~ 1 ,
+           PARTY == "PD" & (year == 0 | year == 2) ~ 1 ,
+           .default = 0
+         ))
+
+data_2 = inner_join(data_inc_2, rcsr, by = "REGION")
+  
+library(lme4)
+fit_1= lmer(log(alpha) ~ (1 | REGION:PARTY) + (1 | PARTY:year) + M + inc + RCSR_2018:M , data_2, REML = FALSE)
+fit_2= lmer(log(alpha) ~ (1 | REGION:PARTY) + (1 | PARTY:year) + M + inc  , data_2, REML = FALSE)
+
+anova(fit_1, fit_2)
+```
+
+
+
+fit test regression on lme4
+```{r}
+library(lme4)
+
+glmer(alpha ~ (1|REGION) + inc_pd + inc_m5s , data = data_no_rcsr, family = Gamma)
+b
+
+
+make_standata(bf(alpha~ (1 | REGION:PARTY) + (1| PARTY:year) + inc_pd + inc_m5s +
+                   inc_fi + year) ,
+              data_no_rcsr,
+              exponential(link = "log"))
+fit = brm(bf(alpha~ (1 | REGION:PARTY) + (1| PARTY:year) + inc_pd + inc_m5s +
+                   inc_fi + year) ,
+              data_no_rcsr,
+              exponential(link = "log"))
+```
+
+```{r}
+summary(fit)
+```
+
+
+
+```{r}
+library(brms)
+
+# to avoid confusion with brms internals
+bind <- function(...) cbind(...)
+
+# fit <- brm(bf(bind(FORZA_ITALIA, FRATELLI_D_ITALIA,LEGA, MOVIMENTO_5_STELLE , O, PARTITO_DEMOCRATICO, ABSTENTION) ~ year + , muFORZA_ITALIA ~ inc_fi), data_inc, dirichlet())
+# make_standata(bf(prop ~ year,
+#                  muFRI~ inc_fd + treat_frat, muM5S~inc_m5s, muPD~inc_pd, muLEGA~inc_lega + treat_lega, muFI~inc_fi),
+#               data_inc,
+#               dirichlet(refcat = "ABSTENTION"))
+fit1 = brm(bf(prop ~ year,
+                 muFRI~ inc_fd + treat_frat, muM5S~inc_m5s, muPD~inc_pd, muLEGA~inc_lega + treat_lega, muFI~inc_fi),
+              data_inc,
+              dirichlet(refcat = "ABSTENTION"))
+```
+
+
+#fit the dirichlet:
+
+
+```{r}
+lm(PARTITO_DEMOCRATICO ~ inc_pd + year + FORZA_ITALIA + LEGA + FRATELLI_D_ITALIA + REGION, data_inc) -> test_lm
+test_lm |> summary()
+
+animus = inner_join(, data13)
+party = DR_data(animus[,-c(1,2,3,4,5)])
+
+animus$test = rnorm(nrow(animus))
+animus$test_2 = 2 * rnorm(nrow(animus))
+animus$test_3 =   rnorm(nrow(animus))
+
+fit_test = DirichReg(party~RCSR_2022 + test * test_2 +  test_3:RCSR_2022, animus)
+tmp
+```
+
+```{r}
+fit_test |> summary()
+fit_test$formula
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Import the necessary packages.
 ```{python}
 from jax import random, vmap
 import jax.numpy as jnp
@@ -93,92 +343,166 @@ import numpyro
 from numpyro import handlers
 from numpyro.diagnostics import hpdi
 import numpyro.distributions as dist
-from numpyro.infer import MCMC, NUTS
+from numpyro.infer import MCMC, NUTS, HMC
 
 import numpy as np
+```
 
 
-def model_region(obs = None, n_district = None):
+Define the model.
+```{python}
+def model_region(obs = None):
     
-    with numpyro.plate("party", 4):
+    with numpyro.plate("party", int(obs.shape[1])):
       # log_a = numpyro.sample("log_a", dist.Normal(0, 3))
-      a = numpyro.sample("a", dist.HalfNormal(3))
-      
-    # a = jnp.exp(log_a)
+      log_a = numpyro.sample("a", dist.HalfNormal(10))
     
-    with numpyro.plate("data", 160):
+    a = jnp.exp(log_a)
+    
+    with numpyro.plate("data", int(obs.shape[0])):
       numpyro.sample("obs", dist.Dirichlet(a), obs = obs)
         
 
 ```
 
+Initialize the Numpyro NUTS kernel.
 ```{r}
-nuts_kernel = py$NUTS(py$model_region)
+nuts_kernel = py$HMC(py$model_region)
 
-mcmc = py$MCMC(nuts_kernel, num_samples=2000L, num_warmup=2000L, jit_model_args = TRUE )
+mcmc = py$MCMC(nuts_kernel, num_samples=4000L, num_warmup = 4000L, num_chains = 1L, jit_model_args = TRUE,)
+rng_key = py$random$key(42L)
+```
+
+Quick std for proportions (some issue in data aggregation for small polling stations) implementation:
+```{r}
+std_1 <- function(x){
+  x/sum(x)
+}
+# keep proper values the same
+std_1(c(0.4,0.4,0.2)) == c(.4,.4,.2)
+# adjust for aggregation/numerical errors for smaller locations
+std_1(c(0.5,0.5,0.2)) |> sum() == 1
+```
+
+let's fit the dirichlet:
+```{r}
+
+party_names <- data22[,-c(1,2,3,4)] |> names()
+
+# fit the dirchlet for all regions:
+fitted = lapply(unique(data22$REGION), function(reg){
+  # fit the dirichlet
+  param = fitDirichlet(data22[REGION == reg, -c(1,2,3,4)])$alpha
+  # get the number of polling stations
+  N_pol =  data22[REGION == reg, .N]
+  list(param = param,
+       conc = sum(param),
+       REGION = reg,
+       n_polling = N_pol)
+})
+
+#organize it in a tabular dataset:
+
+alpha_by_party = as.data.frame(t(sapply(fitted, function(fit){
+  fit$param
+})))
+
+# get the other variables:
+rest_var = lapply(fitted, function(fit){
+  list(conc = fit$conc, REGION = fit$REGION, n_polling = fit$n_polling)
+})
+
+rest_dt = rbindlist(rest_var)
+
+names(alpha_by_party) <- party_names
+data_y = cbind(alpha_by_party, rest_dt)
+data_y 
+```
+
+
+Let's get some visualization in this data
+
+In the following graph we can observe that the #polling station doesn't affect the concentration of the votes.
+```{r}
+data_y |> 
+  ggplot(aes(x = n_polling, y = conc, colour = REGION))+
+  geom_point()+
+  theme_bw()
+```
+
+Let's see the correlation between the actractiveness of fratelli d'italia and actractiveness of abstention 
+```{r}
+data_y |> 
+  ggplot(aes(x = ABSTENTION, y = FRATELLI_D_ITALIA, colour = REGION))+
+  geom_point()+
+  theme_bw()
+```
+
+Now try the same with the democratic party
+
+
+```{r}
+data_y |> 
+  ggplot(aes(x = ABSTENTION, y = PARTITO_DEMOCRATICO, colour = REGION))+
+  geom_point()+
+  theme_bw()
+```
+
+
+
+
+
+Try to convert data into long format:
+```{r}
+long_data = melt(as.data.table(data_y), measure.var = c(1,2,3,4,5,6,7))
+long_data 
+```
+
+try the racial animus variable
+```{r}
+gtrend = load_gtrends_data()
+RCSR_2022 = get_rcsr_by_region(gtrend, year= 2022)
+fin_dat = inner_join(long_data[variable == "FRATELLI_D_ITALIA",],
+           RCSR_2022, by = "REGION")
+
+lm(value~RCSR_2022,fin_dat) |> summary()
+```
+
+
+
+Convert the data to jax format.
+```{r}
+jnp = import("jax.numpy", as = "jnp")
+# correct_matrix <- as.matrix(data22[REGION == "EMILIA",-c(1,2,3,4)])
+# std_matrix = t(apply(t(correct_matrix), 2, std_1))
+data_veneto_raw = jnp$array(as.matrix(data22[REGION == "VENETO",-c(1,2,3,4)]))
+data_em_raw = jnp$array(as.matrix(data22[REGION == "CALABRIA",-c(1,2,3,4)]))
+
+ve = py$np$array(data_veneto_raw)
+em = py$np$array(data_em_raw)
+
+
+data_emilia = data_veneto_raw
+data_emilia = data_em_raw
+# (data_emilia - data_em_raw)
+# data_emilia = data_emilia[1:50,]
+```
+
+```{r}
+# adjust the prng structure over the doc NOTE
+
 rng_key = py$random$key(42L)
 
-# Get the data in jax arrays
-data_jax = py$jnp$array(as.matrix(data[data$region == 3, 1:4]))
-data_jax$shape[1] |> print()
 
-mcmc$run(rng_key, obs = data_jax, n_district = py$jnp$array(160L))
+mcmc$run(rng_key, obs = data_emilia)
 ```
 
 ```{r}
 mcmc$print_summary()
-
-c(-0.72, 0.03, 1.16, 1.92) |> exp()
-c(0.08, 0.06, 1.65, 1.37) |> exp()
-c(-0.97, -0.03, 1.73, 1.48) |> exp()
 ```
-
-
-# Now lejt's build the hierarchical model.
-```{python}
-# def model_national(obs = None, region_idx = None, N = None):
-#     
-#     # Make the prior for the population dirichlet
-#     # with numpyro.plate("party", 4):
-#     #   a = numpyro.sample("a", dist.HalfNormal(1))
-#       
-#     with numpyro.plate("region", len(np.unique(region_idx))):
-#       a_reg = numpyro.sample("a_reg", dist.Dirichlet)
-#       
-#     with numpyro.plate("data", N):
-#       numpyro.sample("obs", dist.Dirichlet(a_reg[region_idx]), obs = obs)
-#       
-      
-def model_national(obs = None, region_idx = None, N = None):
-    
-    sigma_reg = numpyro.sample("sigma_reg", dist.HalfNormal(1))
-    
-    with numpyro.plate("party", 4):
-      log_c_party = numpyro.sample("c_party", dist.Normal(jnp.zeros(1), jnp.ones(1)*3))
-    
-    c_party = jnp.exp(log_c_party)
-    
-    with numpyro.plate("party", 4):
-      with numpyro.plate("region", len(np.unique(region_idx))):
-        log_a_reg = numpyro.sample("a_reg", dist.Normal(c_party, sigma_reg))
-      
-    a_reg = jnp.exp(log_a_reg)
-    
-    with numpyro.plate("data", N):
-      numpyro.sample("obs", dist.Dirichlet(a_reg[region_idx]), obs = obs)
-```
-
 ```{r}
-nuts_kernel = py$NUTS(py$model_national)
-
-mcmc = py$MCMC(nuts_kernel, num_samples=2000L, num_warmup=1000L, jit_model_args = TRUE)
-rng_key = py$random$key(42L)
-
-# Get the data in jax arrays
-data_jax = py$jnp$array(as.matrix(data[, 1:4]))
-region_idx =  py$jnp$array(as.integer(data[, 5]))
+data22[REGION == "VENETO",]
 ```
-
 
 # Move it to blackjax
 ```{python}
@@ -186,14 +510,14 @@ from numpyro.infer.util import initialize_model
 
 rng_key, init_key = random.split(r.rng_key)
 
-init_params, potential_fn_gen, *_ = initialize_model(init_key, model_national, model_args=(r.data_jax, r.region_idx, 1526), dynamic_args=True, )
+init_params, potential_fn_gen, *_ = initialize_model(init_key, model_region, model_args=(r.data_emilia,), dynamic_args=True, )
 ```
 
 Convert it to a logdensity function:
 ```{python}
 from jax import jit
 
-logdensity_fn = lambda position: -potential_fn_gen(r.data_jax, r.region_idx, 1526)(position)
+logdensity_fn = lambda position: -potential_fn_gen(r.data_emilia)(position)
 logdensity_jit = jit(logdensity_fn)
 initial_position = init_params.z
 ```
@@ -202,7 +526,7 @@ Create the kernel for nuts algo with step size and inv mass matrix
 ```{python}
 import blackjax
 
-inv_mass_matrix = jnp.ones(45)
+inv_mass_matrix = jnp.ones(7)
 step_size = 1e-3
 
 nuts = blackjax.nuts(logdensity_jit, step_size, inv_mass_matrix)
@@ -228,7 +552,7 @@ def inference_loop(rng_key, kernel, initial_state, num_samples):
 
 Run the algo:
 ```{python}
-n_samples = 100
+n_samples = 10000
 rng_key, sample_key = random.split(rng_key)
 states = inference_loop(sample_key, kernel, init_state, n_samples)
 
@@ -248,46 +572,19 @@ Save the results of the test to file:
 
 
 
-# Let's look at the results in r
-```{r}
-np = import("numpy", as = "np")
-output = py$mcmc_samples
-
-# population level estimates, prior
-data_pop = as.data.frame(np$array(output$c_party))
-names(data_pop) <- c("a1","a2","a3","a4")
-
-library(tidyr)
-
-long <- data_pop |> # [1000:nrow(data_pop)] %>%
-  pivot_longer(
-    cols = a1:a4, 
-    names_to = "alpha",
-    values_to = "value"
-)
-
-alpha
-exp(sapply(data_pop, mean))
-
-long |> 
-  ggplot(aes(x = exp(value)))+
-  geom_density()+
-  facet_wrap(.~alpha)+
-  theme_bw()
-```
 
 And now let's plot the region based ones
 ```{r}
-data_reg = output$a_reg
+data_reg = py$mcmc_samples$a
+data_plot = as.data.frame(np$array(data_reg))
 
-n_samples = data_reg$shape[[1]]
-burnout = 10
+names(data_plot)
 
-data_plot = data_reg[burnout:n_samples,,]
-# mean_concentration per region x party
-estimates = as.data.frame(np$array(data_plot$mean(0L)))
-names(estimates) <- party_names
-exp(estimates)
+data_plot |> 
+  ggplot(aes())+
+  geom_density()+
+  geom_freqpoly(aes(y = after_stat(density)))+
+  theme_bw()
 ```
 
 
