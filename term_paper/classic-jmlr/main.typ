@@ -14,7 +14,7 @@
    email: "Er.Antonucci@campus.lmu.de"),
 )
 
-#let abstract = [Hello darlings]
+#let abstract = []
 
 #show: jmlr.with(
   title: [Effect of Racial Animus in Italian Elections],
@@ -26,6 +26,47 @@
 )
 
 = Introduction
+
+Framing the political situation of Italy.
++ Frame the volatility,
++ Rise of far right movement,
++ Topic of immigration
++ Decrease in turnout
++ Role of Incumbency
+
+= Motivation
++ Google data as proxy for socially sensitive attitudes,
++ Why is still relevant to the timeframe analyzed - before ChatGpt
++ Difference between the US context and the Italian context
++ Area limitation - possible improvements with rearranging (see "limitations")
++ Justification for the choice of the proxy
+
+= Aggregate Model Justification - WT
++ Research Q: Capturing the vote flux from M5S party to right wing coalition
++ Vote share analysis among the right.
++ Doesn't account for incumbency
++ Including turnout
+
+= Methodlogy
++ The model vote share model
++ The simplifying assumptions
++ The Dirichlet distribution + interpretation
++ How the parameters are estimated, modelling issues.
++ Structure of the final time regression
++ "treatment" variable
+
+= Results
++ Aggregate model results
+ - Mainly driven by incumbency
++ Disaggregate model results
+ - Effect estimation/interpretation
+ - Limitation with identifiability and model selection
+
+= Conclusions
+Limited interpretability due to contestable model assumptions, possible proposal for improvement:
+ - more fine grained index,
+ - More complex Dirichlet regression method (difficult to obtain convergence)
+ - Beta regression
 
 #set math.equation(numbering: none)  // There are no numbers in sample paper.
 
