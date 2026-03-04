@@ -32,10 +32,11 @@
 = Introduction
 
 = The Italian Election
-Framing the political situation of Italy.
+= Framing the political situation of Italy.
 
 In Europe, in the years following the Great Financial Crisis of 2008, it was possible to observe the rise of far-right parties across the continent #citeb(<lazaridis2016rise>). 
-Italy was not exempt; parties such as "Lega Nord" (North League) and Fratelli D'Italia, rose through the polls and overtook the leadership role of the right wing coalition, previously held by Forza Italia - a Europeist, Atlantist, liberal center right party. FI dominated the Italian political scene since 1994, when the entrepreneur Silvio Berlusconi decided to enter politics. Campaining was run on the creation of the cult of personality of the party leader #citeb(<campus2006antipolitica>) NOTE.
+Italy was not exempt; parties such as "Lega Nord" (North League) and Fratelli D'Italia, rose through the polls and overtook the leadership role of the right wing coalition, previously held by Forza Italia - a Europeist, Atlantist, liberal center right party.
+FI dominated the Italian political scene since 1994, when the entrepreneur Silvio Berlusconi decided to enter politics. Campaining was run on the creation of the cult of personality of the party leader #citeb(<campus2006antipolitica>) NOTE.
 
 \
 After the slow fall of FI in the elections, the role of hegemonic leader of the italian right wing politics was first claimed by "Lega" former north separatist party. The new party leader Matteo Salvini restructured the party to have now a nationalist imprinting rather than a regionalist one #citeb(<albertazzi2018no>). By 2013 "Lega" was the oldest party in the parliament with presence in the territory, especially in economically relevant regions in the North, such as Piedmont, Lombardy and Veneto.
@@ -52,36 +53,149 @@ M5S was founded after 2008 by Italian comedian Beppe Grillo. The party advocated
 The party refused to form government coalitions,they remained at the opposition. That lead them to be the first party in the 2018 election. 
 
 \
-Fratelli 
+Fratelli d'Italia
+
+Fratelli d'Italia was founded before the 2013 election NOTE, as members left PDL - the great right wing coalition party led by berlusconi. The party remained marginal, with the exception of the region Lazio (of ROME) until the 2022 election. The party gained traction under the leadership of Giorgia Meloni (Italian PM at the time of writing). The party was one of the few party that remained in the opposition for the length of the 2018 2022 period. They honed in into European, Italian christian messaging.
 
 
 
-+ Frame the volatility,
-+ Rise of far right movement,
-+ Topic of immigration
-+ Decrease in turnout
-+ Role of Incumbency
+
+== Frame the volatility,
+Italy is a democratic parliamentary republic. The rules concerning electoral threshold still allows for small parties (\<3%) to have seats in both the Senate and the chambers of Deputees. This allows for a more fragmented political scenery. Where parties build temporary coalitions to support the government. This makes governance very unstable, and changes of governments are frequent. 
+
+
+
+== Rise of far right movement,
+
+
+== Topic of immigration
+The public debate centered around the topic of migration from 2013 to 2018, mainly under the constant mediatic pressure by Salvini. While thinking on what the most appropriate metric for racial animus. However the prevalence of the topic leading to the 2022 elections decreased - possibly beacuse of covid-19 #citeb(<pasini2023issue>).
+== Decrease in turnout
+Another noticeable trend in italian elections is the stark decline in turnout. This is possibly due to loss of trust of the republican institution. People seeked to move away from traditional parties (PD, FI) and seek alternative that presented themselves as anti-system (M5S, FDI, LEGA). This phenomenon is already well observed at the time of the Roman Republic, (_homo novus_).
+
+== Role of Incumbency
+
+When we consider that most popular party by number of votes we can clearly see an alternating trends, historically (before 2013) mainly between the biggest left party and Berlusconi's party. This trend continued after, but each time with a new face on top. (NOTE: graph from wikipedia)
+As elected parties and leaders spent political capital, consensus declines. That is why a lot of work in the paper went into being able to include incumbency in the modelling.
+
 
 = Motivation
-+ Google data as proxy for socially sensitive attitudes,
-+ Why is still relevant to the timeframe analyzed - before ChatGpt
-+ Difference between the US context and the Italian context
-+ Area limitation - possible improvements with rearranging (see "limitations")
+
+== Google data as proxy for socially sensitive attitudes,
+The original paper #citeb(<salganik2020measuring>) tries to asses the impact of racial animus on Obama's electoral performance. In surveys, respondents tend to hide socially undesirable behaviours #citeb(<kreuter2008social>), such as racial animus; this is know as the social desirability bias. 
+Therefore researchers are always in search of unbiased indirect measures for sensitive topics.
+The proxy measure proposed by the author relies on the fact that people feel more free in front of a screen, reducing the social desirability bias.
+The paper found that the effect of racial animus was up to 2 times more than NOTE what is was obatined with traditional methods. 
+Google trends provides relative area values for search rate, obfuscated so that it is not possible to identify single users. 
+These relative measurement are defined as follow:
+NOTE: it looks horrible
+$ "Racially Charged Search Rate"_j = ["Google searches including the word N"/"Total google searches"]_j/["Google searches including the word N"/"Total google searches"]_"max" $ 
+
+Many studies found out that GSR correlate with people, quote paper.NOTE
+
+
+== Why is still relevant to the timeframe analyzed - before ChatGpt
+One concern regarding the use of google trends data is that nowadays most people replaced traditional search engines with LLMs. However the timeframe analyzed in this paper was before chatgpt market dominance. As of November 2022 NOTE, chatgpt had only 1mill users globally. Not enough to be a disruptive force in the market share of web searches in Italy.
+==  Difference between the US context and the Italian context
+In his case the treatment variable of a black candidate is self evident.
+In the Italian context, however, the number of seats occupied by people of african descent can be counted on on hand (3 out of 600 in the current legislature). 
+Even tho the black population in Italy consists of bareli 1mill, the topic has been central in recent Italian political history.
+Especially since the newer right wing parties initiated a more aggressive and pervasive comunication thanks to the use of social media.
+The second part of the paper focuses on analyzing the electoral effect of this more aggressive campaign, and try to capture wheter racial animus played a role in this shifting political trends.
+
+== Area limitation - possible improvements with rearranging (see "limitations")
+#cite(<salganik2020measuring>) uses media market as areas, as the people in said area are exposed to the same radio and tv content.
+Italy doesn't have a strict equivalent, as the state broadcast is the same everywhere (NOTE CHECK), with the addition of local regional tv channel.
+Also google search areas are neatly available only at regional level.
+Ideally it would be possible to construct more granular areas for rcsr. That could be done convenientely at the release of google official api. See "limitations" NOTE
 + Justification for the choice of the proxy
+The term used for the search is the Italian N-word. Using google's trend tool we can see that most correlated researches are a play cards company and some locations, and they still are weakly correlated to it.
+That implies that most of the searches for the word are isolated and confounding uses of the word by the black population as an endearing term are absent or negligible in the italian context. 
+
+= Data
+The electoral data are from the government source #link("https://elezionistorico.interno.gov.it/")[_eligendo_] for elections. Data is available at comune level (town). With information about the candidated and the electoral list (coalition) they are running for.
+The region Valle d'Aosta is excluded, as their data comes from a different sources due to administrative reasons.
+
++ camera and senato are very similar
++ people vote mainly for the list and rarely for the candidate.
++ Focus on the camera data.
+
+The data is transformed such that proportion of votes is available at polling district level for the Chamber of Deputies.
 
 = Aggregate Model Justification - WT
-+ Research Q: Capturing the vote flux from M5S party to right wing coalition
+== Research Q: Capturing the vote flux from M5S party to right wing coalition
+For the first question analyzed, we observe the right wing coalition votes as an aggregate. 
+In 3 election cycle, the leading right wing party changed each time, however the overall perfomance of the coalition - that run together during the election - increases over time. 
+Leading to the 2022 election M5S party lost a great amount of consensus. 
+The party run on the premise of behing neither "right" nor "left", capturing in 2013 and 2018 the vote of people dissappointed in traditional parties or the establishment in general. 
+We assumed that people disappointed in the party had 2 options, go back to their previous voting habits (right, left or center) or not-to vote.
+Some of the voters must have come from a right wing background. With this aggregate model we try to capture the fraction of voters that turned their back on M5S and went back to the right. 
+The model tries to capture wheter people that did that were driven by racial animosity. 
 + Vote share analysis among the right.
+Graph the right wing parties.
 + Doesn't account for incumbency
+The model has the flaw of not accounting for incumbency.
+Since the party of the right wing coalition are binded to run together only for the time of the elction, with the startegical decison o fgetting as many seats as possible. However once the seats are obtained there is no allegiance regarding the formation of goverment.
+
 + Including turnout
+Analyzing the data we can clearly see that turnout is a very relevant factor in the elections. That is why is included as regressor at regional (observation) level.
 
 = Methodlogy
-+ The model vote share model
-+ The simplifying assumptions
+== The model vote share model
+In order to model each party separatly we decided to use a Dirichlet distribution for the vote shares. For that we assume a MMM model #citeb(<kononovicius2017modeling>), for the transition probabilities.
+The model assumptions is that people are more likely to change their vote if people around them have done so already. 
+According to the model the distributions of vote shares across polling district (stations in the original paper) follows a beta distribution.
+
+\
+Model equations
+
+\ 
+If we generalize the model to a multi-party system, the convergence distribution is not known.
+However it can be shown that under the two following assumptions the convergence distribution is a Dirichlet, where the alpha parameters correspond to the idiosyncratic actractoveness parameter of the MMM model:
++ assu one
++ assu two
+
 + The Dirichlet distribution + interpretation
-+ How the parameters are estimated, modelling issues.
+The dirichlet distribution is characterized by:
+
+\
+$ F(x) = "something" $ 
+\
+where $F(x)$ is the density function and $Beta(s)$ is the beta function.
+The dirichlet can be thought as the generalization of the Beta distribution to multiple parameters. The domain of the dirichlet is the simplex.
+the vector of parameters $bold(alpha) = (alpha_1, dots ,alpha_p)$, called concetration parameters, represents in our model the actractiveness of the different parties.
+
+Look figure for interpretation NOTE (make graph with estimate with real parties and estimated alpha levels).
+
+
+
+
+== How the parameters are estimated, modelling issues.
+Ideally the independent variables that affect the $alpha_j$ would be jointly estimated through a Dirichlet regression. However, due to the time correlated nature of the data, there is the need to include correlated errors. 
+However non bayesian routines for the estimation of dirichlet regression have not yet the degree of flexibility required to capture the requirements mixed effect required by the model. 
+
+On the other end bayesian implementations of this model struggle with convergence and are computationally intensive due to the big size of the dataset.
+
+For that reason the approach implemented in this paper, first estimates the $alpha$ coefficient of the dirichlet regression, and later regress linear mixed models on the $log(.)$ of the $alpha$.
+
+In order to control for decrease in turnout, abstension is also modelled as a party. With its own alpha estimate to account for the actractiveness of the non voting option. The MMM model should reasonably apply to abstension.
+If people around decide not to vote, I may also be encouraged to do the same. 
+The final regression is not run on the $alpha_"abstention"$ as it makes no sense to define incumbency and other regressors for abstentions. 
+
 + Structure of the final time regression
+Two step estimation:
+- First the $bold(alpha_r) = (alpha_(r 1), ..., alpha_(r P))$ is estimated for each region, where $P$ is the total number of parties modelled.
+- In the second step, all the alphas are joined in one tabular dataset and the following regression is estimated:
+$ log(alpha_(p r t)) = beta_0 + gamma_0 + dots $ 
+
+The variables are:
+-
+-
+-
+
+Random effect are included to account for random variability induced by regional variation in party strength and $dots$ .
 + "treatment" variable
+The binary variable $C$ (communication), stand in for the right wing communication.
 
 = Results
 + Aggregate model results
@@ -90,8 +204,10 @@ Fratelli
  - Effect estimation/interpretation
  - Limitation with identifiability and model selection
 
+= Limitations
 = Conclusions
 Limited interpretability due to contestable model assumptions, possible proposal for improvement:
+
  - more fine grained index,
  - More complex Dirichlet regression method (difficult to obtain convergence)
  - Beta regression
