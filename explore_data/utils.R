@@ -1,16 +1,31 @@
 #' load the last years raw data.tables
-load_all_data_tables <- function(){
-  camera22 <<- data.table::fread("../data/camera-20220925/Camera_Italia_LivComune.csv")
-  senato22 <<- data.table::fread("../data/senato-20220925/Senato_Italia_LivComune.csv")
+load_all_data_tables <- function(markdown = TRUE){
+  if (markdown == TRUE){
+    camera22 <<- data.table::fread("../data/camera-20220925/Camera_Italia_LivComune.csv")
+    senato22 <<- data.table::fread("../data/senato-20220925/Senato_Italia_LivComune.csv")
 
-  camera18 <<- data.table::fread("../data/camera-20180304/Camera2018_livComune.txt")
-  senato18 <<- data.table::fread("../data/senato-20180304/Senato2018_livComune.txt")
+    camera18 <<- data.table::fread("../data/camera-20180304/Camera2018_livComune.txt")
+    senato18 <<- data.table::fread("../data/senato-20180304/Senato2018_livComune.txt")
 
-  camera13 <<- data.table::fread("../data/camera-20130224/camera_italia-20130224.txt")
-  senato13 <<- data.table::fread("../data/senato-20130224/senato_italia-20130224.txt")
+    camera13 <<- data.table::fread("../data/camera-20130224/camera_italia-20130224.txt")
+    senato13 <<- data.table::fread("../data/senato-20130224/senato_italia-20130224.txt")
 
-  camera08 <<- data.table::fread("../data/camera-20080413/camera_italia-20080413.txt")
-  senato08 <<- data.table::fread("../data/senato-20080413/senato_italia-20080413.txt")
+    camera08 <<- data.table::fread("../data/camera-20080413/camera_italia-20080413.txt")
+    senato08 <<- data.table::fread("../data/senato-20080413/senato_italia-20080413.txt")
+  } else {
+
+    camera22 <<- data.table::fread("data/camera-20220925/Camera_Italia_LivComune.csv")
+    senato22 <<- data.table::fread("data/senato-20220925/Senato_Italia_LivComune.csv")
+
+    camera18 <<- data.table::fread("data/camera-20180304/Camera2018_livComune.txt")
+    senato18 <<- data.table::fread("data/senato-20180304/Senato2018_livComune.txt")
+
+    camera13 <<- data.table::fread("data/camera-20130224/camera_italia-20130224.txt")
+    senato13 <<- data.table::fread("data/senato-20130224/senato_italia-20130224.txt")
+
+    camera08 <<- data.table::fread("data/camera-20080413/camera_italia-20080413.txt")
+    senato08 <<- data.table::fread("data/senato-20080413/senato_italia-20080413.txt")
+  }
 }
 
 #' load the last two election relevant data.tables
@@ -90,10 +105,16 @@ filter_right_wing <- function(partylist){
 }
 
 # load data from the gtrends folder
-load_gtrends_data <- function(){
-  files = list.files(path = "../data/gtrends/")
-  files = sapply(files, function(x) paste0("../data/gtrends/", x))
-  lapply((files), data.table::fread)
+load_gtrends_data <- function(markdown = TRUE){
+  if (markdown == TRUE){
+    files = list.files(path = "../data/gtrends/")
+    files = sapply(files, function(x) paste0("../data/gtrends/", x))
+    lapply((files), data.table::fread)
+  } else {
+    files = list.files(path = "data/gtrends/")
+    files = sapply(files, function(x) paste0("data/gtrends/", x))
+    lapply((files), data.table::fread)
+  }
 }
 
 #' get turnout from a dataset

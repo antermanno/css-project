@@ -6,9 +6,10 @@ library(dplyr)
 library(stringdist)
 library(sf)
 
-load_all_data_tables()
+load_all_data_tables(markdown = FALSE)
+# fix the directory thingy NOTE
 # load_18_22_data_tables()
-gtrend = load_gtrends_data()
+gtrend = load_gtrends_data(markdown = FALSE)
 
 set_region_column_camera()
 set_region_column_senato()
@@ -17,6 +18,9 @@ set_region_column_senato()
 # camera18[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 # camera13[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 # camera08[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
+
+
+
 
 # COMPARE THAT THE REGION DENOMINATION IS THE SAME FOR ALL
 lapply(list(camera08, camera13, camera18, camera22), function(x){
@@ -139,12 +143,14 @@ delta_share_rx = get_delta_share(share_rx)
 # data = inner_join(turn13 , turn18, by = "REGION")
 # data = inner_join(data, turn22, by = "REGION")
 
-load_all_data_tables()
+load_all_data_tables(markdown = F)
 # load_18_22_data_tables()
-gtrend = load_gtrends_data()
+gtrend = load_gtrends_data(markdown = F)
 
 set_region_column_camera()
 set_region_column_senato()
+
+
 
 # lista22 = camera22$LISTA |> unique()
 # lista18 = camera18$LISTA |> unique()
@@ -154,11 +160,14 @@ set_region_column_senato()
 #     c(lista08, lista13, lista18, lista22)
 # ) |> unique()
 
-party_names = get_party_names()
-party_names = setNames(party_names, party_names)
+# party_names = get_party_names()
+# party_names = setNames(party_names, party_names)
 
 RCSR_2022 = get_rcsr_by_region(gtrend, year = 2022)
 RCSR_2018 = get_rcsr_by_region(gtrend, year = 2018)
+RCSR_2013 = get_rcsr_by_region(gtrend, year = 2013)
+
+tmp = get_final_dataset_by_party()
 # make a list with data for all parties
 # data_all = lapply(party_names,get_final_dataset_by_party)
 # by_party = get_final_dataset_by_party()
