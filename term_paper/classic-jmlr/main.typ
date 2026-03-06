@@ -141,7 +141,7 @@ Since the party of the right wing coalition are binded to run together only for 
 Analyzing the data we can clearly see that turnout is a very relevant factor in the elections. That is why is included as regressor at regional (observation) level.
 
 = Methodlogy
-== The model vote share model
+== The vote share model
 To model parties' characteristics more granurarly we choosed to use a multi-state agent-based model that assumes a herding behaviour, as in #cite(<kononovicius2017modeling>).
 The following model was originally proposed by #cite(<kirman1993ants>), and it assumes that agents make their decisions based either on the perceived actractiveness of their options or due to peer-pressure, even when rational reasons to choose are lacking.
 For the two states case, we choose to represent the transition probabilities as follows#footnote(
@@ -186,20 +186,8 @@ $ P(X_i -> X_i + 1) = (N - X_i)(epsilon_i + X_i)Delta t_s $ <multipos>
 $ P(X_i -> X_i - 1) = X_i (epsilon_(-i) + N - X_i)Delta t_s $<multineg>.
 \
 
-Where $epsilon_(-i) = sum_(j!=i) epsilon_j$ 
+Where $epsilon_(-i) = sum_(j!=i) epsilon_j$ is the sum of the actractiveness parameters for all other parties. The marginal distributions for the votes of each party is looks like a beta distributions. The joint is Dirichlet.
 
-In order to model each party separatly we decided to use a Dirichlet distribution for the vote shares. For that we assume a MMM model #citeb(<kononovicius2017modeling>), for the transition probabilities.
-The model assumptions is that people are more likely to change their vote if people around them have done so already. 
-According to the model the distributions of vote shares across polling district (stations in the original paper) follows a beta distribution.
-
-\
-Model equations
-
-\ 
-If we generalize the model to a multi-party system, the convergence distribution is not known.
-However it can be shown that under the two following assumptions the convergence distribution is a Dirichlet, where the alpha parameters correspond to the idiosyncratic actractoveness parameter of the MMM model:
-+ assu one
-+ assu two
 
 + The Dirichlet distribution + interpretation
 The dirichlet distribution is characterized by:
@@ -207,11 +195,8 @@ The dirichlet distribution is characterized by:
 \
 $ F(x) = "something" $ 
 \
-where $F(x)$ is the density function and $Beta(s)$ is the beta function.
-The dirichlet can be thought as the generalization of the Beta distribution to multiple parameters. The domain of the dirichlet is the simplex.
-the vector of parameters $bold(alpha) = (alpha_1, dots ,alpha_p)$, called concetration parameters, represents in our model the actractiveness of the different parties.
 
-Look figure for interpretation NOTE (make graph with estimate with real parties and estimated alpha levels).
+NOTE Look figure for interpretation NOTE (make graph with estimate with real parties and estimated alpha levels).
 
 
 
