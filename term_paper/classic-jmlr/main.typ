@@ -122,7 +122,7 @@ The region Valle d'Aosta is excluded, as their data comes from a different sourc
 
 The data is transformed such that proportion of votes is available at polling district level for the Chamber of Deputies.
 
-= Aggregate Model Justification - WT
+= Aggregate Model Justification - WT <aggregate>
 == Research Q: Capturing the vote flux from M5S party to right wing coalition
 For the first question analyzed, we observe the right wing coalition votes as an aggregate. 
 In 3 election cycle, the leading right wing party changed each time, however the overall perfomance of the coalition - that run together during the election - increases over time. 
@@ -142,6 +142,52 @@ Analyzing the data we can clearly see that turnout is a very relevant factor in 
 
 = Methodlogy
 == The model vote share model
+To model parties' characteristics more granurarly we choosed to use a multi-state agent-based model that assumes a herding behaviour, as in #cite(<kononovicius2017modeling>).
+The following model was originally proposed by #cite(<kirman1993ants>), and it assumes that agents make their decisions based either on the perceived actractiveness of their options or due to peer-pressure, even when rational reasons to choose are lacking.
+For the two states case, we choose to represent the transition probabilities as follows#footnote(
+[The original model is defined in terms of the actractiveness parameter $sigma_1$ and the interaction strength between the two groups $h$.
+Equation @transition1 looks as follows: $P(X -> X + 1) = (N-X)(sigma_1 + h X)Delta_t$. #cite(<kononovicius2017modeling>) ignores the temporal component, as it is not relevant in his case and introduces the rescaled time $t_s = h t$ and the rescaled actractiveness parameter $epsilon_i = sigma_i/h$. As in my NOTE case a temporal analysis is conducted, the theoretical stationary distribution is not necessarly a Beta and the parameter h should be considered. 
+To keep the Beta distribution assumption valid from a theoretical standpoint, we discretize time at the three election dates and we assume that the rescaled actractiveness remain constant for the duration of one election cycle.]
+) <note1>:
+
+\
+$ P(X -> X + 1) = (N - X)(epsilon_1 + X)Delta t_s $ <transition1>
+$ P(X -> X - 1) = X (epsilon_2 + (N - X))Delta t_s $. 
+\
+
+Where $N$ is population size, $X$ is number of population mebers in category 1 and $epsilon_i$ is the actractiveness of category $i$.
+At each moment in time the probability of switching to the other category depends on the number of members in both categories and the group specific actractiveness.
+
+In the limit $N -> infinity$, the stationary distribution for the quantity $x = X/N$ - the proportion of members of category 1 - is the beta distribution $"Beta"(epsilon_1, epsilon_2) $
+#citeb(<kononovicius2017modeling>).
+
+The beta distribution density function...
+
+The $epsilon_1$ parameter, actractiveness parameter in our framework, models the the expected value for $x$ and the concentration of the shares NOTE: graph with real examples.
+
+When we generalize the model to more than two parties, underr the limit $N -> infinity$, the stationary distribution is a $"Dirichlet"(epsilon_1, epsilon_2, dots, epsilon_P)$. That is true only under the following assumptions#footnote([
+The non binary state case of the model's transition probabilities look as follows:
+
+\
+$ P(X_i -> X_i + 1) = sum_(j != i) X_j (sigma_(j i) + h_(j i)X_i)Delta t, $   
+$ P(X_i -> X_i - 1) = X_j sum_(j != i) (sigma_(i j) + h_(i j)X_j)Delta t. $
+\
+
+To get equations @multipos and @multineg we require that $sigma_(i j) = sigma_i $ and that $h_(i j) = h$, $forall i,j$. The validity of the simplyfing assumptions can be contested
+(#cite(<kononovicius2017modeling>),  #cite(<deffuant2006comparing>)), especially (1.), that is explicitly contradicted in the aggregate model in section @aggregate. More details in the limitation section. ])<note2>:
+
++ the perceived actractiveness of a party doesn't doesn't depend on the party from which an agent comes from;
++ the interaction between agents is symmetric and independent of the current agent's party.
+
+Under this assumption we can simplify the transition probabilities for each party to look as follows:
+\
+$ P(X_i -> X_i + 1) = (N - X_i)(epsilon_i + X_i)Delta t_s $ <multipos>
+
+$ P(X_i -> X_i - 1) = X_i (epsilon_(-i) + N - X_i)Delta t_s $<multineg>.
+\
+
+Where $epsilon_(-i) = sum_(j!=i) epsilon_j$ 
+
 In order to model each party separatly we decided to use a Dirichlet distribution for the vote shares. For that we assume a MMM model #citeb(<kononovicius2017modeling>), for the transition probabilities.
 The model assumptions is that people are more likely to change their vote if people around them have done so already. 
 According to the model the distributions of vote shares across polling district (stations in the original paper) follows a beta distribution.
