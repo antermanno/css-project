@@ -213,20 +213,34 @@ In order to control for decrease in turnout, abstension is also modelled as a pa
 If people around decide not to vote, I may also be encouraged to do the same. 
 The final regression is not run on the $alpha_"abstention"$ as it makes no sense to define incumbency and other regressors for abstentions. 
 
-+ Structure of the final time regression
-Two step estimation:
-- First the $bold(alpha_r) = (alpha_(r 1), ..., alpha_(r P))$ is estimated for each region, where $P$ is the total number of parties modelled.
-- In the second step, all the alphas are joined in one tabular dataset and the following regression is estimated:
-$ log(alpha_(p r t)) = beta_0 + gamma_0 + dots $ 
+== Structure of the final time regression
+
+The estimates are performend across the three election cycles - 2013, 2018, 2022 - as this is the earliest of date for which all parties are present. For each year, the parameter vector of the dirichlet is estimated for each region. The final alpha estimates will have 3 indexes:
+$ alpha_(t r p); t = "year"; r = "region", p = "party" $ 
+For each region each year the vector $bold(alpha_(t r)) = (alpha_(t r 1), ..., alpha_(t r P))$ is estimated, where $P$ is the total number of parties modelled.
+
+Note that also abstension (complement of turnout) is treated as a party, and is deemed to follow the same herding + actractiveness behaviour assumed for parties.
+
+\
+In the recond step the (log) $alpha$ are regressed on the following set of regressors using a mixed effect model.
+$ log(alpha_(p r t)) = beta_0 + M_(t p) + "INC"_(t p) + gamma_(r p) + "RCSR"_(t r) times M_(t p) + epsilon_(p r t) $ 
+$ epsilon  tilde N(bold(0), Sigma) $ 
+NOTE check mixed model assumptions.
+
 
 The variables are:
--
--
--
+- $M_(t p)$ : "treatment" variable. When a right wing party switched to the more aggressive communication approach.
+- $"INC"_(t p)$ : Binary variable representing wheter a party $p$ is incumbent in year $t$. It equals to 1 if the party partook in at least one government in the legislature leading to election in year $t$.
+- $"RCSR"_(t r)$: the racially charged search rate by region $r$, in the time frame between year $t$ and $t - 1$. Year $t_(-1)$ is 2008.
+- $gamma_((dots))$ represents the random effect for indexes $(...)$. 
 
-Random effect are included to account for random variability induced by regional variation in party strength and $dots$ .
+Random intercept are included to account for party specific regional variation. As some party consistently perform better in certain region due to historical allegiances or effect of local government.
+
+
+
 + "treatment" variable
-The binary variable $C$ (communication), stand in for the right wing communication.
+The binary variable $M_(t p)$ is included as to account for the effects of change in communication policy by the parties. What we are interested in looking at is the interaction effect of this variable with the RCSR, to capture wheter the policy improves electoral performances in racially more intense regions. RCSR is included only in the interaction effect as - due to the availability only at regional level - it's effect would be strongly confounded by the region effect. We assume the its non-interaction component of the effect is absorbed by the random effect $gamma_(r p)$.
+
 
 = Results
 + Aggregate model results
@@ -237,6 +251,29 @@ The binary variable $C$ (communication), stand in for the right wing communicati
 
 = Limitations
 = Conclusions
+This analysis has not found statistically significant effects of ratial animus on the most recent Italian elections.
+The analysis doesn't claim any causal interpration. 
+
+The author finds it difficult to justify all the assumptions that lead to the final analysis. 
+
+First of assumption (1), required that the the actractiveness of a party doesn't depend on the party where an agent comes from. In the construction of the aggregate model in section NOTE, in order for the model to answer the research question, it is asuumed that the votes of the right wing coalition shift almost entirely among the coalition. This assumption is backed by observing the electoral trend and the details discussed in the aggregate model results section. Therefore there is no theoretical basis for assuming a Dirichlet stationary distribution, independently on how well the data are fit.
+
+In #cite(<kononovicius2017modeling>), they use mixture of betas to model parties that have segregationist NOTE: reword: tendencies. While some of that tendencies are controlled for by the regional nature of the analysis, some of the in-region segregation is still not accounted for. See for example FDI in Trentino-Alto Adige - a region with a strong ethnical separation between the Italian and German speaking community - we can observe the effect on the mixture nature of the distributions. Same thing can be observed at national level for Lega (strong in the north) and M5S (more prevalent in the south). See graph NOTE: link graph, in the Appendix.
+
+Check the error distribution shape of the alphas. Log NORMAL????
+
+The RCSR score are available only at regional level. This severly limits the statistical power of the analysis. In #cite(<salganik2020measuring>), there are more than 200 areas for which the RCSR is available. To get more granular data it would be required to aggregate the scores and weight by region. However at the time of writing google is testing the new official api. Due to the time constraints of the project I decided to get manually get the data instead of waiting for the access granting. Once an official stable api is released is possible to run the aggregation of the numbers in a way that is simply too much work at the moment. 
+
+In the time model, we have issue with the negative residuals in the 3rd year, as the shock in the party distribution of FDI was beyond what we have seen previously (possibly in the history of the Italian republic).
+
+The "treatment" variable $M_(t p)$ is motivated by the political and mediatic perception of the author and there are no purely empirical justifications for it. It could be appropriate to run some sensitivity analysis and/or permutation to test the validity of the construct. 
+
+It is difficult to identify a model, due to the limited number of data points. 
+
+Sensitivity analysis of the google trend measure are not performed.
+
+Many limitations can be addressed by a more granular availability of the google trends data. 
+
 Limited interpretability due to contestable model assumptions, possible proposal for improvement:
 
  - more fine grained index,
