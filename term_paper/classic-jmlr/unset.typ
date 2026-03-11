@@ -244,11 +244,35 @@ The binary variable $M_(t p)$ is included as to account for the effects of chang
 
 
 = Results
-+ Aggregate model results
+== Aggregate model results
+After running a linear regression on the aggregate model, two outlier regions were identified in the leverage vs residuals plot (CAMPANIA, TRENTINO).
+That can be explained as Campania experienced the second biggest decrease in turnout of all region (after MOLISE).
+Trentino holds the "autonomous region" title and as such as a fairly unique local political situation.
+
+To account for outlier behaviour, the analysis was conducted on paralled on both the data set with and without the two outliers.
+Additionally the possibility of a quadratic affect of change in turnout was considered. Regardless of the model specification, the coefficient corresponding to the racially charged search rate was negative for all cases.
+That induces us to think that the increase in electoral performance of the right wing coalition was driven mainly by drop in turnout (see figure @turnout-by-party).
+
  - Mainly driven by incumbency
-+ Disaggregate model results
+== Mixed model results
+
+
  - Effect estimation/interpretation
  - Limitation with identifiability and model selection
+If we do not assume the herding behaviour voting model, then we cannot interpret the $bold(alpha)$ parameter vector of the dirichlet as the actractiveness parameters for the individual parties. 
+In that case the interpretation of the regression can only tell us about how different regressors impact the expected value of alpha, the overall concentration of votes *or* both. In the context of a beta/dirichlet regression we model the 
+expected values of each party separately from the global concentration parameter #citeb(<ferrari2004beta>).
+In this framework, we will hold the herding model and ancillary assumption true.
+
+
+#figure(
+  image("img/all_against_turnout.png", height: 30%),
+  caption: [In the figure we can observe how the turnout affected different political forces. Notice that %in turnout was less than zero for all regions.\
+On the left most panel, we can see that the right wing coalition (Lega, Fratelli D'Italia, Forza Italia), experience increase in vote share everywere. The increase was stronger in regions where the was a stark drop in turnout. That may suggest an attachment by historical right wing voters. That suggest that the right does a good job at retaining his base, even if the distribution of votes changes among the major right wing parties.
+Partito Democratico, center left, doesn't exibit any strong turnout trend, same as Movimento 5 Stelle, that experienced a uniform decline in all region, regardless of turnout. 
+\We see that for the minor parties (O), we see that they experienced performance boost in regions with less turnout decrease. That may suggest that in more politically active areas, the vote mass shifted from M5S to other less institutionalized entities.]
+
+) <turnout-by-party>
 
 = Limitations
 = Conclusions

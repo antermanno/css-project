@@ -1,3 +1,4 @@
+rm(list = ls())
 source("explore_data/utils.R")
 library(data.table)
 library(ggplot2)
@@ -45,6 +46,7 @@ plot(fit_poly_no_leverage)
 
 anova(fit_agg, fit_poly)
 AIC(fit_agg, fit_poly)
+AIC(fit_no_leverage, fit_poly_no_leverage)
 anova(fit_no_leverage, fit_poly_no_leverage)
 AIC(fit_no_leverage, fit_poly_no_leverage)
 
