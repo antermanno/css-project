@@ -139,10 +139,13 @@ get_turnout_by <- function(DT, is22 = FALSE){
 }
 
 get_rcsr_by_region <- function(gtrend, year = 2022){
+  stopifnot(year == 2022 | year == 2018 | year == 2013)
   if (year == 2022){
-    gtrend_reg = copy(gtrend$gtrends_22.csv)
+    gtrend_reg = copy(gtrend$rcsr_2022.csv)
+  } else if(year == 2018) {
+    gtrend_reg = copy(gtrend$rcsr_2018.csv)
   } else {
-    gtrend_reg = copy(gtrend$gtrend_18.csv)
+    gtrend_reg = copy(gtrend$rcsr_2013.csv)
   }
   rcsr_col_name = paste0("RCSR_", year)
   setnames(gtrend_reg, c("Region", rcsr_col_name))

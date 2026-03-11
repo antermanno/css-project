@@ -1,39 +1,18 @@
-#import "@preview/classic-jmlr:0.7.0": jmlr
-
+// cite things in bracketed form
 #let citeb(tag) = {
   cite(tag, form: "normal")
 }
+// coloring things in red
+#let colred(x) = text(fill: rgb("#fe624f"), $#x$)
 
-#let affls = (
-  one: (
-    department: "Department of Statistics",
-    institution: "Ludwig-Maximilians-Universität",
-    location: "Munich, Bavaria",
-    country: "Germany"),
-)
+#set page(numbering: "1.")
+#set math.equation(numbering: "(1)")  // There are no numbers in sample paper.
+#set heading(numbering: "1.1")
 
-#let authors = (
-  (name: "Ermanno Antonucci",
-   affl: "one",
-   email: "Er.Antonucci@campus.lmu.de"),
-)
-
-#let abstract = []
-
-#show: jmlr.with(
-  title: [Effect of Racial Animus in Italian Elections],
-  authors: (authors, affls),
-  abstract: abstract,
-  keywords: ("Google Trends", "Election Modelling", "Computational Social Sciences"),
-  bibliography: bibliography("main.bib"),
-  appendix: include "appendix.typ",
-)
-
-= Introduction
+#title[TEST UNSET]
 
 = The Italian Election
 = Framing the political situation of Italy.
-
 In Europe, in the years following the Great Financial Crisis of 2008, it was possible to observe the rise of far-right parties across the continent #citeb(<lazaridis2016rise>). 
 Italy was not exempt; parties such as "Lega Nord" (North League) and Fratelli D'Italia, rose through the polls and overtook the leadership role of the right wing coalition, previously held by Forza Italia - a Europeist, Atlantist, liberal center right party.
 FI dominated the Italian political scene since 1994, when the entrepreneur Silvio Berlusconi decided to enter politics. Campaining was run on the creation of the cult of personality of the party leader #citeb(<campus2006antipolitica>) NOTE.
@@ -80,6 +59,7 @@ As elected parties and leaders spent political capital, consensus declines. That
 
 #figure(
   image("img/Italian_Elections_1994-2018.png"),
+  caption: [We can observe an alteranating patter between the major right and left party each election. As a parties gained power they tend to lose political capital NOTE: -find meaning or alternative formulation - over time. Making incumbency a relevant predictor of vote share. Adapted from Wikimedia Commons#citeb(<wiki:itelection>)]
 )
 
 
@@ -126,8 +106,8 @@ The region Valle d'Aosta is excluded, as their data comes from a different sourc
 
 The data is transformed such that proportion of votes is available at polling district level for the Chamber of Deputies.
 
-= Aggregate Model Justification - WT <aggregate>
-== Research Q: Capturing the vote flux from M5S party to right wing coalition
+= Methodlogy
+== Research Q: Capturing the vote flux from M5S party to right wing coalition <aggregate>
 For the first question analyzed, we observe the right wing coalition votes as an aggregate. 
 In 3 election cycle, the leading right wing party changed each time, however the overall perfomance of the coalition - that run together during the election - increases over time. 
 Leading to the 2022 election M5S party lost a great amount of consensus. 
@@ -135,22 +115,31 @@ The party run on the premise of behing neither "right" nor "left", capturing in 
 We assumed that people disappointed in the party had 2 options, go back to their previous voting habits (right, left or center) or not-to vote.
 Some of the voters must have come from a right wing background. With this aggregate model we try to capture the fraction of voters that turned their back on M5S and went back to the right. 
 The model tries to capture wheter people that did that were driven by racial animosity. 
-+ Vote share analysis among the right.
-Graph the right wing parties.
 
 #figure(
+  grid(
+    columns: (auto, auto),
+  image("img/alluvial_all.png"),
   image("img/alluvial_right.png"),
-  caption: [Hello bob]
+  ),
+  caption: [On the left major parties performance across the election cycles 2013, 2018, 2022. On the y axis we have total number of votes, parties are ordered each year vote ranking.
+\ On the right the focus shifts to the right wing parties alone. The total number of votes accrued by the coalition remains more or less constant across years.]
 ) <right-wing>
 
-+ Doesn't account for incumbency
 The model has the flaw of not accounting for incumbency.
 Since the party of the right wing coalition are binded to run together only for the time of the elction, with the startegical decison o fgetting as many seats as possible. However once the seats are obtained there is no allegiance regarding the formation of goverment.
 
-+ Including turnout
+== Including turnout
 Analyzing the data we can clearly see that turnout is a very relevant factor in the elections. That is why is included as regressor at regional (observation) level.
 
-= Methodlogy
+The aggregate model is:
+
+  $ Delta%"SHARE"_(r) = beta_0 + colred(beta_"rcsr")* X_r + beta_"turnout"*Delta T_(r), $
+  $ Delta %"SHARE"_r = "Change in vote share 2018-2022," $ 
+  $ Delta T_r= "Change in turnout 2018-2022," $ 
+  $ X_r = "Racially charged search rate," $ 
+
+where $r$ indexes the region.
 == The vote share model
 To model parties' characteristics more granurarly we choosed to use a multi-state agent-based model that assumes a herding behaviour, as in #cite(<kononovicius2017modeling>).
 The following model was originally proposed by #cite(<kirman1993ants>), and it assumes that agents make their decisions based either on the perceived actractiveness of their options or due to peer-pressure, even when rational reasons to choose are lacking.
@@ -208,8 +197,10 @@ $ F(x) = "something" $
 
 NOTE Look figure for interpretation NOTE (make graph with estimate with real parties and estimated alpha levels).
 
-
-
+#figure(
+  image("img/shape_distribution_ex.png", height: 30%),
+  caption: [Histogram of to exemplify how the marginals for the dirichlet distribution look like. \ Concentration parameters $alpha$ are 1.34, 4.46 and 4.21 respectively.)]
+)
 
 == How the parameters are estimated, modelling issues.
 Ideally the independent variables that affect the $alpha_j$ would be jointly estimated through a Dirichlet regression. However, due to the time correlated nature of the data, there is the need to include correlated errors. 
@@ -291,4 +282,10 @@ Limited interpretability due to contestable model assumptions, possible proposal
  - Beta regression
 
 #set math.equation(numbering: none)  // There are no numbers in sample paper.
+#pagebreak()
+#set heading(numbering: none)
+= Bibliography
+#bibliography("main.bib")
 
+#pagebreak()
+= Appendix
