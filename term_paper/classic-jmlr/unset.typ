@@ -267,7 +267,7 @@ In this framework, we will hold the herding model and ancillary assumption true.
 
 #figure(
   image("img/all_against_turnout.png", height: 30%),
-  caption: [In the figure we can observe how the turnout affected different political forces. Notice that %in turnout was less than zero for all regions.\
+  caption: [In the figure we can observe how the turnout affected different political forces. Notice that %in turnout was less than zero for all regions NOTE: quote table/graph about total number of votes.\
 On the left most panel, we can see that the right wing coalition (Lega, Fratelli D'Italia, Forza Italia), experience increase in vote share everywere. The increase was stronger in regions where the was a stark drop in turnout. That may suggest an attachment by historical right wing voters. That suggest that the right does a good job at retaining his base, even if the distribution of votes changes among the major right wing parties.
 Partito Democratico, center left, doesn't exibit any strong turnout trend, same as Movimento 5 Stelle, that experienced a uniform decline in all region, regardless of turnout. 
 \We see that for the minor parties (O), we see that they experienced performance boost in regions with less turnout decrease. That may suggest that in more politically active areas, the vote mass shifted from M5S to other less institutionalized entities.]
@@ -281,7 +281,8 @@ The analysis doesn't claim any causal interpration.
 
 The author finds it difficult to justify all the assumptions that lead to the final analysis. 
 
-First of assumption (1), required that the the actractiveness of a party doesn't depend on the party where an agent comes from. In the construction of the aggregate model in section NOTE, in order for the model to answer the research question, it is asuumed that the votes of the right wing coalition shift almost entirely among the coalition. This assumption is backed by observing the electoral trend and the details discussed in the aggregate model results section. Therefore there is no theoretical basis for assuming a Dirichlet stationary distribution, independently on how well the data are fit.
+First of assumption (1), required that the the actractiveness of a party doesn't depend on the party where an agent comes from. In the construction of the aggregate model in section NOTE, in order for the model to answer the research question, it is asuumed that the votes of the right wing coalition shift almost entirely among the coalition.
+This assumption is backed by observing the electoral trend and the details discussed in the aggregate model results section. Therefore there is no theoretical basis for assuming a Dirichlet stationary distribution, independently on how well the data are fit.
 
 In #cite(<kononovicius2017modeling>), they use mixture of betas to model parties that have segregationist NOTE: reword: tendencies. While some of that tendencies are controlled for by the regional nature of the analysis, some of the in-region segregation is still not accounted for. See for example FDI in Trentino-Alto Adige - a region with a strong ethnical separation between the Italian and German speaking community - we can observe the effect on the mixture nature of the distributions. Same thing can be observed at national level for Lega (strong in the north) and M5S (more prevalent in the south). See graph NOTE: link graph, in the Appendix.
 

@@ -154,7 +154,7 @@ fit_A = lmer(log(alpha) ~ (1 | REGION*PARTY) +  A + inc,
              data_no_abs, REML = FALSE)
 fit_S = lmer(log(alpha) ~ (1 | REGION*PARTY) +  S + inc,
              data_no_abs, REML = FALSE)
-BIC(fit_inc, fit_A, fit_S, fit_S_TIME)
+BIC(fit_A, fit_S)
 # The best fit is - expectedly - the year in which a party started
 # the new communication/leadership. The postive effect is expected
 # as the year the two parties started the new communication is also the
@@ -203,11 +203,10 @@ BIC(fit_inc, fit_A, fit_S_TIME,  fit_S_rcsr)
 AIC(fit_inc, fit_A, fit_S_TIME,  fit_S_rcsr)
 # looking at IC the model with the interaction is slightly better
 
-
 plot(fit_S_rcsr)
 # The residual pattern doesn't look too unusual
 
-plot(fit,PARTY   ~resid(.)  | year)
+plot(fit_S_rcsr,PARTY   ~resid(.)  | year)
 # We can see that for are still some over and under estimation
 # issues for Lega and Fratelli D'Italia.
 # Those are to be expected as they have the least linear

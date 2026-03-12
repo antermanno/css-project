@@ -44,7 +44,7 @@ camera18[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 camera13[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 camera08[, REGION := stringr::str_extract(CIRCOSCRIZIONE, '\\w*')]
 
-camera13 <<- camera18[, COLLEGIO := COMUNE]
+camera13 <<- camera13[, COLLEGIO := COMUNE]
 camera18 <<- camera18[REGION != "AOSTA", COLLEGIO := COLLEGIOUNINOMINALE]
 camera22 <<- camera22[ , `:=`(
   VOTANTI = VOTANTITOT,
