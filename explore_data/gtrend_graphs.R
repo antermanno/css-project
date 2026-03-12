@@ -15,21 +15,23 @@ rcsr_over_time |>
   theme_bw()+
   ylim(c(0,100))
 
-
-word_comparison = melt(gtrend$common_word_comparison_2014_2022.csv,
+redacted = gtrend$common_word_comparison_2014_2022.csv[, .(WORD1 = negro,
+                                                           cartello, miniera, mistero,
+                                                           Time)]
+word_comparison = melt(redacted,
                         id.vars = "Time",
                        variable.name = "word", value.name = "RCSR")
-
 # compare WORD1 to common words, to get an idea of usage
 word_comparison |>
   ggplot(aes(x = Time, y = RCSR))+
   geom_line(aes(colour  = word, linetype = word),
-            linewidth = 0.7)+
+            linewidth = 1.2)+
   theme_bw()
 
 #compare WORD1 to immigrati
-
-word_comparison_word1_immigrati = melt(gtrend$immigrati_n_2014_2022.csv,
+redacted1 = gtrend$immigrati_n_2014_2022.csv[, .(WORD1 = negro, immigrati,
+                                                 Time)]
+word_comparison_word1_immigrati = melt(redacted1,
                         id.vars = "Time",
                        variable.name = "word", value.name = "RCSR")
 
@@ -37,5 +39,5 @@ word_comparison_word1_immigrati = melt(gtrend$immigrati_n_2014_2022.csv,
 word_comparison_word1_immigrati |>
   ggplot(aes(x = Time, y = RCSR))+
   geom_line(aes(colour  = word, linetype = word),
-            linewidth = 0.7)+
+            linewidth = 1.2)+
   theme_bw()
