@@ -95,6 +95,7 @@ Ideally it would be possible to construct more granular areas for rcsr. That cou
 == Justification for the choice of the proxy
 The search term used to compute the RCSR, is the Italian equivalent of the n-word, from here referred as WORD1. Using google's trend tool we can see that most correlated researches are a play cards company and some locations, and they still are weakly correlated to it.
 That implies that most of the searches for the word are isolated and confounding uses of the word by the black population as an endearing term are absent or negligible in the italian context. 
+// #image("")
 
 = Data
 The electoral data are from the government source #link("https://elezionistorico.interno.gov.it/")[_eligendo_] for elections. Data is available at comune level (town). With information about the candidated and the electoral list (coalition) they are running for.
@@ -140,7 +141,7 @@ The aggregate model is:
   $ X_r = "Racially charged search rate," $ 
 
 where $r$ indexes the region.
-== The vote share model
+== The vote share model <vote-share>
 To model parties' characteristics more granurarly we choosed to use a multi-state agent-based model that assumes a herding behaviour, as in #cite(<kononovicius2017modeling>).
 The following model was originally proposed by #cite(<kirman1993ants>), and it assumes that agents make their decisions based either on the perceived actractiveness of their options or due to peer-pressure, even when rational reasons to choose are lacking.
 For the two states case, we choose to represent the transition probabilities as follows#footnote(
@@ -224,23 +225,27 @@ Note that also abstension (complement of turnout) is treated as a party, and is 
 
 \
 In the recond step the (log) $alpha$ are regressed on the following set of regressors using a mixed effect model.
-$ log(alpha_(p r t)) = beta_0 + M_(t p) + "INC"_(t p) + gamma_(r p) + "RCSR"_(t r) times M_(t p) + epsilon_(p r t) $ 
-$ epsilon  tilde N(bold(0), Sigma) $ 
-NOTE check mixed model assumptions.
+$ log(alpha_(p r t)) = beta_0 + S_(t p) + "INC"_(t p)  + "RCSR"_(t r) times S_(t p) + gamma_(r)+ gamma_(p)+ gamma_(r p)+ epsilon_(p r t), $ 
+$ vec(bold(epsilon), bold(gamma)) tilde N(  vec(bold(0), bold(0)), mat(
+sigma bold(I), bold(0);
+bold(0), bold(G);)). $ 
 
 
 The variables are:
-- $M_(t p)$ : "treatment" variable. When a right wing party switched to the more aggressive communication approach.
+- $S_(t p)$ : "treatment" variable. When a right wing party switched to the more aggressive communication approach.
 - $"INC"_(t p)$ : Binary variable representing wheter a party $p$ is incumbent in year $t$. It equals to 1 if the party partook in at least one government in the legislature leading to election in year $t$.
 - $"RCSR"_(t r)$: the racially charged search rate by region $r$, in the time frame between year $t$ and $t - 1$. Year $t_(-1)$ is 2008.
 - $gamma_((dots))$ represents the random effect for indexes $(...)$. 
+- $epsilon$ is the error.
+- $bold(I)$ is the identity matrix and $sigma$ is the error variance.
+- $bold(G)$ is the covariance matriz for the random effects.
 
 Random intercept are included to account for party specific regional variation. As some party consistently perform better in certain region due to historical allegiances or effect of local government.
 
 
 
 + "treatment" variable
-The binary variable $M_(t p)$ is included as to account for the effects of change in communication policy by the parties. What we are interested in looking at is the interaction effect of this variable with the RCSR, to capture wheter the policy improves electoral performances in racially more intense regions. RCSR is included only in the interaction effect as - due to the availability only at regional level - it's effect would be strongly confounded by the region effect. We assume the its non-interaction component of the effect is absorbed by the random effect $gamma_(r p)$.
+The binary variable $S_(t p)$ is included as to account for the effects of change in communication policy by the parties. What we are interested in looking at is the interaction effect of this variable with the RCSR, to capture wheter the policy improves electoral performances in racially more intense regions. RCSR is included only in the interaction effect as - due to the availability only at regional level - it's effect would be strongly confounded by the region effect. We assume the its non-interaction component of the effect is absorbed by the random effect $gamma_(r p)$.
 
 
 = Results
@@ -256,14 +261,41 @@ That induces us to think that the increase in electoral performance of the right
  - Mainly driven by incumbency
 == Mixed model results
 
+We now look at the results of the second model, to answer the second research question.
+#figure(
+  table(
+    columns: (auto, auto, auto, auto, auto ,auto, auto,auto, auto),
+    inset: 10pt,
+    align: horizon,
+    table.header(
+      [*Regressors:*],[RE],[incumb], [year], [S], [A], [RCSR $times$ S], [#align(center)[*BIC*]], [ #align(center)[*p-value*] ],
+    ),
+    [*m_0*],[$checkmark$ ],[],[],[],[],[],[643.2],[],
+    [*m_inc*],[$checkmark$ ],[$checkmark$ ],[],[],[],[],[559.6],[],
+    [*m_S*],[$checkmark$ ],[$checkmark$ ],[],[$checkmark$ ],[],[],[465.7],[],
+    [*m_A*],[$checkmark$ ],[$checkmark$ ],[],[],[$checkmark$ ],[],[535.8],[],
+    [*m_S_time*],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[],[],[452.3],[$star$ ],
+    [*m_rcsr*],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[],[$checkmark$ ],[452.3],[$star$ *.015* ],
+    [exp(*Estimates*)],[],[.*508*],[.*904*],[*1.102*],[],[*0.010*],[],[],
+  ),
+  caption: [RE stands for random effect and they are present in all model.
+  Regressors are iteratively based on BIC improvement. Once the full best fit model is obtained, the interaction term between *start of far right communication* and *Racially charged search rate* is tested against the nested full model using anova.
+  The exponential of the estimates tells us that, ceteris paribut, the amount our alpha is multiplied when the regressor increases by one.
+  More detail on the model fitting can be found in the repository NOTE.]
 
- - Effect estimation/interpretation
- - Limitation with identifiability and model selection
+)<table>
+
+The interaction effect between the variable S- that signifies the start of far-right, social media driven, messaging  for a party- and the racially charged search rate is significant at level 0.025 (Bonferroni adjusted).
+
+When interpreting the coefficient the following can be said: keeping eveything else constant, for a party that engages in far right messaging, their actractiveness value, as defined by the herding model, changes multiplicatively by a factor of 1.01, when the racially charged search rate of the region increases by 1.
+For example leading to the 2022 election, when Fratelli D'Italia changed their communication strategy, we are expecting that in Sardegna (rscr 70) they would have an actractiveness score 10% higher than the one in Molise (rcsr 60) once we control for all other variables.
+
+When we look at the other coefficients, it is interesting to notice how incumbency is expected to halves you actractiveness score on average. Also we notice that all parties lose 10% actractiveness on average each election cycle. This is due to the loss of actractiveness to abestention, that increases every year.
+
 If we do not assume the herding behaviour voting model, then we cannot interpret the $bold(alpha)$ parameter vector of the dirichlet as the actractiveness parameters for the individual parties. 
 In that case the interpretation of the regression can only tell us about how different regressors impact the expected value of alpha, the overall concentration of votes *or* both. In the context of a beta/dirichlet regression we model the 
 expected values of each party separately from the global concentration parameter #citeb(<ferrari2004beta>).
 In this framework, we will hold the herding model and ancillary assumption true.
-
 
 #figure(
   image("img/all_against_turnout.png", height: 30%),
@@ -271,22 +303,25 @@ In this framework, we will hold the herding model and ancillary assumption true.
 On the left most panel, we can see that the right wing coalition (Lega, Fratelli D'Italia, Forza Italia), experience increase in vote share everywere. The increase was stronger in regions where the was a stark drop in turnout. That may suggest an attachment by historical right wing voters. That suggest that the right does a good job at retaining his base, even if the distribution of votes changes among the major right wing parties.
 Partito Democratico, center left, doesn't exibit any strong turnout trend, same as Movimento 5 Stelle, that experienced a uniform decline in all region, regardless of turnout. 
 \We see that for the minor parties (O), we see that they experienced performance boost in regions with less turnout decrease. That may suggest that in more politically active areas, the vote mass shifted from M5S to other less institutionalized entities.]
-
 ) <turnout-by-party>
 
-= Limitations
 = Conclusions
-This analysis has not found statistically significant effects of ratial animus on the most recent Italian elections.
-The analysis doesn't claim any causal interpration. 
+We now consider what the two analysis give us for an answer to the research questions.
 
-The author finds it difficult to justify all the assumptions that lead to the final analysis. 
+When we look at the first research question: "Did former right wing voters, that in 2018 voted M5S, returned to voting right motivated by their ratial animus?". We do not find any effect. By looking at the turnout trend, and with knowledge that the total number of voters for the rightwing coalition stayed roughly the same, we are led to believe that the increase in electoral performance across the board was due to the ability of the coalition to retain voters as a whole (even though those votes shifted from Lega and Forza Italia to Fratelli d'Italia).
 
-First of assumption (1), required that the the actractiveness of a party doesn't depend on the party where an agent comes from. In the construction of the aggregate model in section NOTE, in order for the model to answer the research question, it is asuumed that the votes of the right wing coalition shift almost entirely among the coalition.
-This assumption is backed by observing the electoral trend and the details discussed in the aggregate model results section. Therefore there is no theoretical basis for assuming a Dirichlet stationary distribution, independently on how well the data are fit.
+When we look at the second question: "Does adopting a far-right communication strategy have a bigger effect in areas with higher racial animus - proxied by racially charged search rate?", we have some evidence that this appears to be true, if the party is also coming off as non incument.
+There are no evidence that the strategy works in retaining the racially animated base. To have more insight the results of the coming 2027 elections, could provide more insight by analysing the performance of Fratelli D'Italia after the government tenure.
 
-In #cite(<kononovicius2017modeling>), they use mixture of betas to model parties that have segregationist NOTE: reword: tendencies. While some of that tendencies are controlled for by the regional nature of the analysis, some of the in-region segregation is still not accounted for. See for example FDI in Trentino-Alto Adige - a region with a strong ethnical separation between the Italian and German speaking community - we can observe the effect on the mixture nature of the distributions. Same thing can be observed at national level for Lega (strong in the north) and M5S (more prevalent in the south). See graph NOTE: link graph, in the Appendix.
+== Limitations
+The above conclusions must be measured against the following considerations.
 
-Check the error distribution shape of the alphas. Log NORMAL????
+First of assumption (1), required that the the actractiveness of a party doesn't depend on the party where an agent comes from. In the construction of the mixed dirichlet model in @vote-share.
+This assumption is backed by observing the electoral trend and the details discussed in the mixed dirichlet model results section. Therefore there is no theoretical basis for assuming a Dirichlet stationary distribution, independently on how well the data are fit.
+
+In #cite(<kononovicius2017modeling>), they use mixture of betas to model parties that have segregationist NOTE: reword: tendencies. While some of that tendencies are controlled for by the regional nature of the analysis, some of the in-region segregation is still not accounted for.
+See for example FDI in Trentino-Alto Adige - a region with a strong ethnical separation between the Italian and German speaking community - we can observe the effect on the mixture nature of the distributions.
+Same thing can be observed at national level for Lega (strong in the north) and M5S (more prevalent in the south). See graph NOTE: link graph, in the Appendix.
 
 The RCSR score are available only at regional level. This severly limits the statistical power of the analysis. In #cite(<salganik2020measuring>), there are more than 200 areas for which the RCSR is available. To get more granular data it would be required to aggregate the scores and weight by region. However at the time of writing google is testing the new official api. Due to the time constraints of the project I decided to get manually get the data instead of waiting for the access granting. Once an official stable api is released is possible to run the aggregation of the numbers in a way that is simply too much work at the moment. 
 
