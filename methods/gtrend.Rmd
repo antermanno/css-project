@@ -22,22 +22,10 @@ pytrends.build_payload(kw_list, timeframe='today 12-m', geo='IT')
 
 Get the request
 ```{python}
-ciao_it = pytrends.multirange_interest_over_time()
-```
-
-Read it in R
-```{r}
-ciao_it = py$ciao_it
-ciao_it
-```
-
-convert it to a time_series
-```{r}
-library(ggplot2)
-ciao_ts = ts(data = ciao_it$Ciao)
-ggplot(ciao_it) + 
-  geom_line(aes(x = 1:nrow(ciao_it), y = Ciao)) +
-  theme_bw()
+try:
+  ciao_it = pytrends.multirange_interest_over_time()
+except Exception as e:
+  print(e)
 ```
 
 

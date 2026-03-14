@@ -1,5 +1,16 @@
 # Final Project for Computational Social Sciences Exam
 
+## Repository Layout
+
+```
+   R/          code for easing data manipulation
+   analysis/           final analysis is performed
+   data/           maps, electoral data, google trends data
+   graphs/         code used to generate graphs
+   methods/            testing different approaches to estimate dirichlet
+   term_paper/         source code for the final paper
+```
+
 ### `ingestion/`
 
 One subdirectory per data source. Sources fall into two categories:

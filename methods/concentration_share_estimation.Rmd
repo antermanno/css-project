@@ -267,31 +267,9 @@ anova(fit_1, fit_2)
 
 
 
-fit test regression on lme4
-```{r}
-library(lme4)
 
-glmer(alpha ~ (1|REGION) + inc_pd + inc_m5s , data = data_no_rcsr, family = Gamma)
-b
-
-
-make_standata(bf(alpha~ (1 | REGION:PARTY) + (1| PARTY:year) + inc_pd + inc_m5s +
-                   inc_fi + year) ,
-              data_no_rcsr,
-              exponential(link = "log"))
-fit = brm(bf(alpha~ (1 | REGION:PARTY) + (1| PARTY:year) + inc_pd + inc_m5s +
-                   inc_fi + year) ,
-              data_no_rcsr,
-              exponential(link = "log"))
-```
-
-```{r}
-summary(fit)
-```
-
-
-
-```{r}
+Not running this as it takes very long time to do the sampling.
+```{r eval=FALSE, include=TRUE}
 library(brms)
 
 # to avoid confusion with brms internals
@@ -311,38 +289,21 @@ fit1 = brm(bf(prop ~ year,
 
 #fit the dirichlet:
 
-
-```{r}
+It may take some time. Issues with the convergence
+```{r warning=FALSE}
 lm(PARTITO_DEMOCRATICO ~ inc_pd + year + FORZA_ITALIA + LEGA + FRATELLI_D_ITALIA + REGION, data_inc) -> test_lm
 test_lm |> summary()
 
-animus = inner_join(, data13)
+animus = inner_join(rcsr, data13)
 party = DR_data(animus[,-c(1,2,3,4,5)])
 
 animus$test = rnorm(nrow(animus))
 animus$test_2 = 2 * rnorm(nrow(animus))
 animus$test_3 =   rnorm(nrow(animus))
 
-fit_test = DirichReg(party~RCSR_2022 + test * test_2 +  test_3:RCSR_2022, animus)
-tmp
-```
-
-```{r}
+fit_test = DirichReg(party~RCSR_2018 + test * test_2 +  test_3:RCSR_2018, animus)
 fit_test |> summary()
-fit_test$formula
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 Import the necessary packages.
@@ -379,9 +340,9 @@ def model_region(obs = None):
 
 Initialize the Numpyro NUTS kernel.
 ```{r}
-nuts_kernel = py$HMC(py$model_region)
+nuts_kernel = py$NUTS(py$model_region)
 
-mcmc = py$MCMC(nuts_kernel, num_samples=4000L, num_warmup = 4000L, num_chains = 1L, jit_model_args = TRUE,)
+mcmc = py$MCMC(nuts_kernel, num_samples=2000L, num_warmup = 2000L, num_chains = 1L, jit_model_args = FALSE,)
 rng_key = py$random$key(42L)
 ```
 
@@ -396,7 +357,7 @@ std_1(c(0.4,0.4,0.2)) == c(.4,.4,.2)
 std_1(c(0.5,0.5,0.2)) |> sum() == 1
 ```
 
-let's fit the dirichlet:
+let's fit the dirichlet
 ```{r}
 
 party_names <- data22[,-c(1,2,3,4)] |> names()
@@ -488,36 +449,44 @@ jnp = import("jax.numpy", as = "jnp")
 # correct_matrix <- as.matrix(data22[REGION == "EMILIA",-c(1,2,3,4)])
 # std_matrix = t(apply(t(correct_matrix), 2, std_1))
 data_veneto_raw = jnp$array(as.matrix(data22[REGION == "VENETO",-c(1,2,3,4)]))
-data_em_raw = jnp$array(as.matrix(data22[REGION == "CALABRIA",-c(1,2,3,4)]))
+data_em_raw = jnp$array(as.matrix(data22[REGION == "EMILIA",-c(1,2,3,4)]))
 
 ve = py$np$array(data_veneto_raw)
 em = py$np$array(data_em_raw)
 
 
-data_emilia = data_veneto_raw
+data_veneto = data_veneto_raw
 data_emilia = data_em_raw
 # (data_emilia - data_em_raw)
 # data_emilia = data_emilia[1:50,]
 ```
 
 ```{r}
-# adjust the prng structure over the doc NOTE
-
 rng_key = py$random$key(42L)
 
-
 mcmc$run(rng_key, obs = data_emilia)
-```
-
-```{r}
 mcmc$print_summary()
 ```
+
+There are issure fitting the regions with more polling stations.
+```{r}
+result = tryCatch({
+    mcmc$run(rng_key, obs = data_veneto)
+}, error = function(error_condition) {
+    print(paste("The following error occurs when running a region with too many polling stations: " ,error_condition))
+})
+```
+
 ```{r}
 data22[REGION == "VENETO",]
 ```
 
 # Move it to blackjax
-```{python}
+
+
+Initialize model fails for regions that are too big.
+Same problem as Numpyro.
+```{python eval=FALSE, include=TRUE}
 from numpyro.infer.util import initialize_model
 
 rng_key, init_key = random.split(r.rng_key)
@@ -526,7 +495,7 @@ init_params, potential_fn_gen, *_ = initialize_model(init_key, model_region, mod
 ```
 
 Convert it to a logdensity function:
-```{python}
+```{python eval=FALSE, include=TRUE}
 from jax import jit
 
 logdensity_fn = lambda position: -potential_fn_gen(r.data_emilia)(position)
@@ -535,7 +504,7 @@ initial_position = init_params.z
 ```
 
 Create the kernel for nuts algo with step size and inv mass matrix
-```{python}
+```{python eval=FALSE, include=TRUE}
 import blackjax
 
 inv_mass_matrix = jnp.ones(7)
@@ -547,7 +516,7 @@ kernel = nuts.step
 
 ```
  the inference loop
-```{python}
+```{python eval=FALSE, include=TRUE}
 import jax
 
 def inference_loop(rng_key, kernel, initial_state, num_samples):
@@ -563,7 +532,7 @@ def inference_loop(rng_key, kernel, initial_state, num_samples):
 ```
 
 Run the algo:
-```{python}
+```{python eval=FALSE, include=TRUE}
 n_samples = 10000
 rng_key, sample_key = random.split(rng_key)
 states = inference_loop(sample_key, kernel, init_state, n_samples)
@@ -571,61 +540,6 @@ states = inference_loop(sample_key, kernel, init_state, n_samples)
 mcmc_samples = states.position
 ```
 
-Save the results of the test to file:
-```{python}
-# 
-# import pickle
-# import os
-# 
-# path = "C:/Users/Ermenegisto/CODING/R/UNI/CSS/final_proj/dirichlet_estimation"
-# with open(path, 'wb') as file:
-#     pickle.dump(mcmc_samples, file)
-```
-
-
-
-
-And now let's plot the region based ones
-```{r}
-data_reg = py$mcmc_samples$a
-data_plot = as.data.frame(np$array(data_reg))
-
-names(data_plot)
-
-data_plot |> 
-  ggplot(aes())+
-  geom_density()+
-  geom_freqpoly(aes(y = after_stat(density)))+
-  theme_bw()
-```
-
-
-```{r}
-actractiveness_by_region
-```
-
-
-```{r}
-# %error (using %change/size = ln(a) - ln(b) for small %)
-sapply(log(actractiveness_by_region) - estimates , mean)
-```
-
-Save the data in R format:
-```{r}
-r_output = lapply(output, function(jx){
-  np$array(jx)
-})
-
-saveRDS(r_output, file = "sample_model_1.rds")
-```
-
-
-
-
-```{r}
-rnorm(100, 0, 4) |> exp() |> 
-  ggplot(aes(x))
-```
 
 
 

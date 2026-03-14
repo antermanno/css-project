@@ -26,12 +26,13 @@ df$y <- with(df, cbind(y1, y2, y3))
 df$region = factor(rep(1:4, 5))
 
 
-bformula = bf(y1 ~ x + (1|region), y2 ~ x)
+bformula = bf(bind(y1, y2, y3) ~ x + (1|region))
 make_stancode(bf(bind(y1, y2, y3) ~ x + (1|region)), df, dirichlet())
 make_standata(bind(y1, y2, y3) ~ x + (1 | region), df, dirichlet())
 
-fit <- brm(bformula, df, dirichlet())
-summary(fit)
+# Not running the stan code
+# fit <- brm(bformula, df, dirichlet())
+# summary(fit)
 ```
 
 
@@ -373,15 +374,4 @@ r_output = lapply(output, function(jx){
 
 saveRDS(r_output, file = "sample_model_1.rds")
 ```
-
-
-
-
-```{r}
-rnorm(100, 0, 4) |> exp() |> 
-  ggplot(aes(x))
-```
-
-
-
 
