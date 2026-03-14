@@ -11,9 +11,12 @@ rcsr_over_time = rcsr_over_time[, .(date = as.Date(month) , RCSR)]
 
 rcsr_over_time |>
   ggplot(aes(x = date, y = RCSR))+
-  geom_line(linewidth = 0.7, alpha = 0.7)+
+  geom_line(linewidth = 0.8, alpha = 0.7)+
   theme_bw()+
-  ylim(c(0,100))
+  ylim(c(0,100))+
+  labs(x = "year",
+       y =  "Relative Search Volume for WORD1",
+       title = "Racially Charged Search Rate over time in Italy")
 
 redacted = gtrend$common_word_comparison_2014_2022.csv[, .(WORD1 = negro,
                                                            cartello, miniera, mistero,

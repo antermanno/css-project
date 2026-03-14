@@ -20,7 +20,7 @@ FI dominated the Italian political scene since 1994, when the entrepreneur Silvi
 \
 After the slow fall of FI in the elections, the role of hegemonic leader of the italian right wing politics was first claimed by "Lega" former north separatist party. The new party leader Matteo Salvini restructured the party to have now a nationalist imprinting rather than a regionalist one #citeb(<albertazzi2018no>). By 2013 "Lega" was the oldest party in the parliament with presence in the territory, especially in economically relevant regions in the North, such as Piedmont, Lombardy and Veneto.
 Salvini push towards a national dimension allowed the party to gain consensus in the regions of center italy, previously lead by the left and even in some of the southern regions, previously actively despised by the party. NOTE.
-As one of the most storied parties, the by 2013 "Lega" had been part of government coalitions 4 NOTE times, Salvini framed the party as an outsider. Pushing anti establishment messaging (mainly criticising europe, as opposed to italy), while shifting the public debate on the topic of immigrants. Looking at google trends data (NOTE: ADD GRAPH) we can get an idea of how prevalent the topic was in italian public debate.
+As one of the most storied parties, the by 2013 "Lega" had been part of government coalitions 4 NOTE times, Salvini framed the party as an outsider. Pushing anti establishment messaging (mainly criticising europe, as opposed to italy), while shifting the public debate on the topic of immigrants. Looking at google trends data (see @word1-migration).
 
 This pushed the league to be the leading party of the right. In 2018 they got the second most amount of seats in parliament (even tho they where the 3rd party by voteshare). 
 
@@ -109,7 +109,7 @@ When looking what other kind of queries the word is used in,most of them are abo
 Other searches pertain surnames and names of tourist hotspots and businesses. However, they are also a negligible amount of the total searches for WORD1.
 
 The use of WORD1 has reached nowadays unambigously the status of slur in Italy #citeb(<gaye2023razza>). For this reason it was the search term of choice and it was not mixed with other terms potentially indicating racial animus. 
-More details can be found in the Appendix (NOTE: PUT FIGURES).
+More details can be found in the Appendix (see @word1-migration).
 
 ==  Difference between the US context and the Italian context
 In his #cite(<salganik2020measuring>) the treatment variable of a black candidate is self evident.
@@ -215,8 +215,7 @@ At each moment in time the probability of switching to the other category depend
 In the limit $N -> infinity$, the stationary distribution for the quantity $x = X/N$ - the proportion of agents with choice 1 - is the beta distribution $"Beta"(epsilon_1, epsilon_2) $
 #citeb(<kononovicius2017modeling>).
 
-The $epsilon_1$ parameter, actractiveness parameter in our framework, models the the expected value for $x$ and the concentration of the shares NOTE: graph with real examples.
-
+The $epsilon_1$ parameter, actractiveness parameter in our framework, models the the expected value for $x$ and the concentration of the shares.
 When we generalize the model to more than two parties, underr the limit $N -> infinity$, the stationary distribution is a $"Dirichlet"(epsilon_1, epsilon_2, dots, epsilon_P)$ - that can be seen as the high dimensional generalization of the Beta. That is true only under the following assumptions#footnote([
 The non binary state case of the model's transition probabilities look as follows:
 
@@ -233,18 +232,16 @@ To get equations @multipos and @multineg we require that $sigma_(i j) = sigma_i 
 
 Under this assumptions we can simplify the transition probabilities for each party to look as follows:
 \
-$ P(X_i -> X_i + 1) = (N - X_i)(epsilon_i + X_i)Delta t_s $ <multipos>
+$ P(X_i -> X_i + 1) = (N - X_i)(epsilon_i + X_i)Delta t_s, $ <multipos>
 
-$ P(X_i -> X_i - 1) = X_i (epsilon_(-i) + N - X_i)Delta t_s $<multineg>.
-\
+$ P(X_i -> X_i - 1) = X_i (epsilon_(-i) + N - X_i)Delta t_s, $<multineg>
 
-Where $epsilon_(-i) = sum_(j!=i) epsilon_j$ is the sum of the actractiveness parameters for all other parties. The marginal distributions for the votes share distribution of party $i$ looks like $"Beta"(epsilon_i, epsilon_(-i))$.
+where $epsilon_(-i) = sum_(j!=i) epsilon_j$ is the sum of the actractiveness parameters for all other parties. The marginal distributions for the votes share distribution of party $i$ looks like $"Beta"(epsilon_i, epsilon_(-i)).$
 
-NOTE Look figure for interpretation NOTE (make graph with estimate with real parties and estimated alpha levels).
 
 #figure(
   image("img/shape_distribution_ex.png", height: 30%),
-  caption: [Histogram that exemplifies how the marginals for the dirichlet distribution look like. \ Concentration parameters $alpha$ are 1.34, 4.46 and 4.21 respectively.)]
+  caption: [Histogram that exemplifies how empirical vote share distribution looks like. Data from 2018. \ Concentration parameters $alpha$ are 1.34, 4.46 and 4.21 respectively.)]
 )
 
 == How the parameters are estimated, modelling issues.
@@ -326,12 +323,12 @@ We now look at the results of the second model, to answer the second research qu
     [*m_A*],[$checkmark$ ],[$checkmark$ ],[],[],[$checkmark$ ],[],[535.8],[],
     [*m_S_time*],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[],[],[452.3],[$star$ ],
     [*m_rcsr*],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[$checkmark$ ],[],[$checkmark$ ],[452.3],[$star$ *.015* ],
-    [exp(*Estimates*)],[],[.*508*],[.*904*],[*1.102*],[],[*0.010*],[],[],
+    [*exp(Estimates)*],[],[.*508*],[.*904*],[*1.102*],[],[*0.010*],[],[],
   ),
   caption: [RE stands for random effect and they are present in all model.
   Regressors are iteratively based on BIC improvement. Once the full best fit model is obtained, the interaction term between *start of far right communication* and *Racially charged search rate* is tested against the nested full model using anova.
-  The exponential of the estimates tells us that, ceteris paribut, the amount our alpha is multiplied when the regressor increases by one.
-  More detail on the model fitting can be found in the repository NOTE.]
+  The exponential of the estimates tells us that, ceteris paribus, the amount our alpha is multiplied when the regressor increases by one.
+  More detail on the model fitting can be found in the attached repository.]
 
 )<table>
 
@@ -349,7 +346,7 @@ In this framework, we will hold the herding model and ancillary assumption true.
 
 #figure(
   image("img/all_against_turnout.png", height: 30%),
-  caption: [In the figure we can observe how the turnout affected different political forces. Notice that %in turnout was less than zero for all regions NOTE: quote table/graph about total number of votes.\
+  caption: [In the figure we can observe how the turnout affected different political forces. Notice that %in turnout was less than zero for all regions.\
 On the left most panel, we can see that the right wing coalition (Lega, Fratelli D'Italia, Forza Italia), experience increase in vote share everywere. The increase was stronger in regions where the was a stark drop in turnout. That may suggest an attachment by historical right wing voters. That suggest that the right does a good job at retaining his base, even if the distribution of votes changes among the major right wing parties.
 Partito Democratico, center left, doesn't exibit any strong turnout trend, same as Movimento 5 Stelle, that experienced a uniform decline in all region, regardless of turnout. 
 \We see that for the minor parties (O), we see that they experienced performance boost in regions with less turnout decrease. That may suggest that in more politically active areas, the vote mass shifted from M5S to other less institutionalized entities.]
@@ -373,8 +370,7 @@ This assumption is explicitly violated in @aggregate, as we assume that the vote
 Also in @note1 is explicited how the static framework employed in #cite(<kononovicius2017modeling>) doesn't automatically translate to this over time dynamic analysis. There are no theoretical guarantees that the $epsilon_i$ are an accurate depiction of the actractiveness of a party.
 
 In #cite(<kononovicius2017modeling>), they use mixture of betas to model parties that have segregationist NOTE: reword: tendencies. While some of that tendencies are controlled for by the regional nature of the analysis, some of the in-region segregation is still not accounted for.
-See for example FDI in Trentino-Alto Adige - a region with a strong ethnical separation between the Italian and German speaking community - we can observe the effect on the mixture nature of the distributions.
-Same thing can be observed at national level for Lega (strong in the north) and M5S (more prevalent in the south). See graph NOTE: link graph, in the Appendix.
+See for example FDI in Trentino-Alto Adige - a region with a strong ethnical separation between the Italian and German speaking community - that is clearly visible here (see @trentino).
 
 The RCSR score are available only at regional level. This severly limits the statistical power of the analysis. In #cite(<salganik2020measuring>), there are more than 200 areas for which the RCSR is available. To get more granular data it would be required to aggregate the scores and weight by region. However at the time of writing google is testing the new official api. Due to the time constraints of the project I decided to get manually get the data instead of waiting for the access granting. Once an official stable api is released is possible to run the aggregation of the numbers in a way that is simply too much work at the moment. 
 
@@ -403,6 +399,25 @@ Limited interpretability due to contestable model assumptions, possible proposal
 #pagebreak()
 = Appendix <appendix>
 #figure(
-  image("img/rcsr_final.png"),
-  caption: [Relative search rate for WORD1 and the queries in which it most frequently appears.]
+  image("img/word1_queries.png"),
+  caption: [Relative search rate for WORD1 and the queries in which it most frequently appears. The queries are the minority of the searches.]
 )<word1-dal> 
+
+#figure(
+  image("img/common_comparison.png"),
+  caption: [WORD1 and unrelated words with similar Relative Volume.\
+cartello : sign, cartel;\
+  miniera : mine (location);\
+  mistero : mistery.
+]
+)<word1-common> 
+
+#figure(
+  image("img/word1_migration.png", height: 35%),
+  caption: [Here the RSV of WORD1 is compared with the word immigrati (migrants) and clandestino/i ($tilde$illegal alien/s). We can see that the terms "immigrati" and "clandestini" have a more spikey behaviour, when compared to WORD1 and clandestino, the singular version of the word. That can be explained by the fact that the negatively connotated term was almost always used in the plural form.]
+)<word1-migration>
+
+#figure(
+  image("img/trentino_voteshare.png"),
+  caption: [In Trentino-Alto Adige, a region with a strong independentist tendencies, we observe the mixture of beta behaviour described by #cite(<kononovicius2017modeling>).]
+)<trentino> 
