@@ -9,65 +9,103 @@
 #set math.equation(numbering: "(1)")  // There are no numbers in sample paper.
 #set heading(numbering: "1.")
 
-#title[TEST UNSET]
+#title[Effect of Racial Animus in Italian Elections]
 
-= The Italian Election
+#set par(justify: true)
+
+= Abstract
+
+
+= Introduction
+In this day an age, liberal democracies are undergoing through changes in their political structure. Historical parties are gradually losing popular support and new dynamic alternatives started gaining popularity.
+The people of G7 countries are starting to experience what it means to live in stagnating economy.
+A process that drastically started with the Great Financial Crisis of 2008 and got exacerbated with the Global Pandemic.
+Politicians gradually shifted from a communication of common prosperity to a constant emergency status. The people started to demand that their leaders do more than managing a non more growing system, they demanded change.
+The far-right proposes such change be a return to the past. A past where the nation was prosper, and united, with some sinister hints to what that united might mean.
+
+In the era of social media, of fast news and information overload, it is important to track what are the steady forces at play in shaping our political landscape. So that we can take better informed decision when fullfilling the our duties as citizens of the Country, Europe and the World.
+
+In this paper we try to measure the effect of racial animus on the voting patterns of Italian citizizen in the time after the Great Financial Crisis to today. In this period the Right reclaimed the hegemonic role in Italian politics, it did so by taking a new form and new parties took a spot that was of one person and one person only in the previous 15 years. A new way of communicating, more bold, more dynamic, laser focus on some specific topics, such as migration, security and national identity, allowed new forces to rise to power.
+
+What impact had racial animus in this? We try to tackle the issue on two different front by presenting the following research questions:
+- What role did racial animus in Center voters played in the success of the Right in the 2022?
+- To what extent the success of the election winning far-right parties is due to actracting racially animated voters?
+
+Resorting to google trend data to get unbiased proxy measures of racial animus.NOTE
 = Framing the political situation of Italy.
-In Europe, in the years following the Great Financial Crisis of 2008, it was possible to observe the rise of far-right parties across the continent #citeb(<lazaridis2016rise>). 
-Italy was not exempt; parties such as "Lega Nord" (North League) and Fratelli D'Italia, rose through the polls and overtook the leadership role of the right wing coalition, previously held by Forza Italia - a Europeist, Atlantist, liberal center right party.
-FI dominated the Italian political scene since 1994, when the entrepreneur Silvio Berlusconi decided to enter politics. Campaining was run on the creation of the cult of personality of the party leader #citeb(<campus2006antipolitica>) NOTE.
+In Europe, in the years following the Great Financial Crisis of 2008, it has been possible to observe the rise of far-right parties across the continent #citeb(<lazaridis2016rise>). 
+Italy was not exempt; parties such as "Lega Nord" (LEGA) and Fratelli D'Italia (FDI), rose through the polls and overtook the leadership role of the right wing coalition, previously held by Forza Italia (FI), in 2018 and 2022 respectively.
+This is not a small feat, considering that FI, under the leadership of the charismatic entrepreneur Silvio Berlusconi #citeb(<campus2006antipolitica>), was the most popular right wing party since 1994.
 
-\
-After the slow fall of FI in the elections, the role of hegemonic leader of the italian right wing politics was first claimed by "Lega" former north separatist party. The new party leader Matteo Salvini restructured the party to have now a nationalist imprinting rather than a regionalist one #citeb(<albertazzi2018no>). By 2013 "Lega" was the oldest party in the parliament with presence in the territory, especially in economically relevant regions in the North, such as Piedmont, Lombardy and Veneto.
-Salvini push towards a national dimension allowed the party to gain consensus in the regions of center italy, previously lead by the left and even in some of the southern regions, previously actively despised by the party. NOTE.
-As one of the most storied parties, the by 2013 "Lega" had been part of government coalitions 4 NOTE times, Salvini framed the party as an outsider. Pushing anti establishment messaging (mainly criticising europe, as opposed to italy), while shifting the public debate on the topic of immigrants. Looking at google trends data (see @word1-migration).
+After the slow fall of FI in the elections, the role of hegemonic leader of the italian right wing politics was first claimed by LEGA. 
+After Matteo Salvini became party in leader in 2013, party politics moved away from the roots, a Northern Italian separatist/federalist party, to a national dimension #citeb(<albertazzi2018no>).  This summarised in the party slogan "Prima gli Italiani!" (Italians first!).
+Even though LEGA was at the time the oldest party in the Parliament and has been part of governements before, Salvini managed to present it as a new entity altogether. He will drop the "Nord" (North) from the name and center the party around is persona.
+The party skyrocketed in the polls, not only in the historically strong regions in the North, but also in the Center and South. 
+From 4% in 2013 to 17% in 2018.
+LEGA will go and form a coalition government with Movimento 5 Stelle (M5S) following the 2018 elections.
 
-This pushed the league to be the leading party of the right. In 2018 they got the second most amount of seats in parliament (even tho they where the 3rd party by voteshare). 
 
-\
-Movimento 5 Stelle.
+Movimento 5 Stelle was founded in 2009 by Italian comedian Beppe Grillo.
+The party advocated for direct democracy, enacted through the party's proprietary online platform, digitalization in state affairs.
+M5S was presented as a people's party, for the people by the people. In the 2013 election, almost all of the inductees in the Parliament did not have political roles at any level.
+The party promoted initiatives such as "Vaffa Day" ("F\*\*k You Day") in the same optic.
+M5S shattered the dichotomy Right vs Left, claiming such categories as from the past. It was very successful in collecting the votes of people tired of the institutional parties such as FI and the center-left Partito Democratico (PD).
+All of this was exacerbated the economic crisis, M5S collected 25% of votes in its first political appearance.
+Party leadership decided to not partake in any government coalition in the 2013-2018 legislature.
+A strategy that would be confirmed winning when in 2018 the party will claim first place with a staggering 32%.
 
-M5S was founded after 2008 by Italian comedian Beppe Grillo. The party advocated for direct democracy, informatization of politics and overall transparancy. This was a response to the numerous scandals that involved mainly silvio berlusconi. The leaders of the party said they were neither right nor left. The party created a dichotmization in "us" (the people) and "them" (the politicians, often referred to as "The Cast"). After the 2013 election, after a pretty succefull performance at the poll (Nth place NOTA), most of the inducted parliament members where not politicians by profession.
-
-The party refused to form government coalitions,they remained at the opposition. That lead them to be the first party in the 2018 election. 
-
-\
-Fratelli d'Italia
 
 Fratelli d'Italia was founded before the 2013 election NOTE, as members left PDL - the great right wing coalition party led by berlusconi. The party remained marginal, with the exception of the region Lazio (of ROME) until the 2022 election. The party gained traction under the leadership of Giorgia Meloni (Italian PM at the time of writing). The party was one of the few party that remained in the opposition for the length of the 2018 2022 period. They honed in into European, Italian christian messaging.
+
+Fratelli D'Italia (FDI) was founded in 2012. Former members of the super right wing party Popolo Della Libertà (PDL - a rebranding of FI) that shared a background in Alleanza Nazionale, historical far-right party. The party remained marginal, it had 9 seats in 2013 and 19 seats in 2018 (with 4% of votes).
+It did not join any government, even when LEGA and FI did. It always stayed in the opposition. 
+In the 2022 election, it became the number one party of Italy (under the leadership of Giorgia Meloni - since 2014).
+The messaging of the party was focused on promoting the Italian national Identity, identified with European Christian values, and safety. Differently from LEGA, FDI pushed for a stronger collaboration with europe.
+
 
 
 
 
 == Frame the volatility,
-Italy is a democratic parliamentary republic. The rules concerning electoral threshold still allows for small parties (\<3%) to have seats in both the Senate and the chambers of Deputees. This allows for a more fragmented political scenery.
+Italy is a democratic parliamentary republic. 
+The Parliament is composed of two entities: Chamber of Deputees (Camera) and the Senate of the Republic (Senato). 
+General elections are supposed to happen every 5 years, during which the members of the two assemblies are renewed.
+The President of the Republic nominates a Prime Minister with the task of forming the government. The goverment then need to have the majority in both assemblies to officially enter into power.
+It is typical for the Italian Parliament to have few (2-3) big and several small parties at any given time. 
+That foster the necessity to create alliances to form governments, many of which of fragile nature;
+out of 68 governments since the start of Republican history (1946), only 5 of them lasted more than 1000 days, staying in charge 1.1 years on average.
+The rules concerning electoral threshold still allows for small parties (\<3%) to have seats in both the Senate and the chambers of Deputees. This allows for a more fragmented political scenery.
 Where parties build heterogeneous temporary coalitions to support the government. This makes governance very unstable, and changes of governments are frequent.
-Out of 68 governments since the start of Republican history (since 1946), only 5 of them lasted more than 1000 days, staying in charge for 1.1 years on average and median NOTE.
+This is NOTE stimulated by the electoral system that allows parties to get seats even at very low percentages.
 
-The electoral system has changed every two elections, since 2008.
-For the years 2008 and 2013, the electoral system was proportional with a majority bonus. For the 2018 and 2022 election, a mixed system between first pass the post and proportional was introduced (similar to the 1993 system).
-Relevant is the fact that for the 2018 and 2022 election, electoral coalitions can be formed (called list). First pass the post candidates are jointly nominated by each list. While the rest of the seats in are assigned proportionally (at national level for the Chamber of Deputees, at regional level for the Senate).
+Since 2008, the electoral system has changed once, before the 2018 eleciton. 
+For the years 2008 and 2013, the system was proportional with a majority bonus. For the 2018 and 2022 election, a mixed system between first pass the post and proportional was introduced (similar to what was active in 1993).
+It is worth noting that, in both systems, electoral coalitions can be formed (called lists). Parties in a list get to share the majority bonus in the first system and get to nominate candidates jointly in first pass the post districts.
+Coalitions - such as FI, FDI and LEGA - do not have to share strategies after elections are over.
+We can see heterogeneous decision in joining governance by members of a coalition. 
+This is a key difference from the US system in #cite(<salganik2020measuring>), the incumbency is not directly tied to electoral results, making it necessary to have separate analysis for each party. NOTE more on that in section 
 
-Due to the changes and complex nature of the system, our focus will be directed towards analysis of party vote shares and how those changes over time.
-However it is relevant, especially when looking at the success of the right wing coalition, that the three parties ran as one list in since 2008. However this collaboration did not necessarely extended to the formation of goverments, where each individual party had their own unique strategy. 
 
-For this reason it is relevant to also take into account the incumbency of individual parties in the analysis.
-
-== Rise of far right movement
-
+Due to the changes and complex nature of the system, our focus will be directed towards analysis of party vote shares and how those changes over time and we will avoid to analyze how seats are assigned. It should not be forgotten that the mechanism trough which seats are assigned is very relevant in the final balance of power. Therefore factors that affect vote share do can impact non homogenously across places, due to such mechanism. NOTE sentence structure.
 
 == Topic of immigration
-The public debate centered around the topic of migration from 2013 to 2020, mainly under the constant mediatic pressure by Salvini. While thinking on what the most appropriate metric for racial animus. However the prevalence of the topic leading to the 2022 elections decreased - possibly beacuse of covid-19 #citeb(<pasini2023issue>).
+The public debate centered around the topic of migration from 2013 to 2020, mainly under the constant mediatic pressure by Salvini. 
+In the media, especially in the pre-covid era, people of color are mainly reprsented in the context of migration, possibly confounding the racial issue with the issue of migration.
+
+Moreover, migration was not as central of a topic in the 2022 election as it was in 2018, possibly due to the impact of covid-19 #citeb(<pasini2023issue>).
+In this paper we will try to focus on the impact of racial animus. When looking at google trend data we observe that the raciall search NOTE.
+
 == Decrease in turnout
 Another noticeable trend in italian elections is the stark decline in turnout. This is possibly due to loss of trust of the republican institution.
 People seeked to move away from traditional parties (PD, FI) and seek alternative that presented themselves as anti-system (M5S, LEGA, FDI).
-This is in line with what is happening nowadays in other countries such as UK and Germany, where the popular support is gradually shifting from historical istitutional parties (Labour, Tories, SPD) to new - or previously marginal - political forces (Reform UK, AfD, Greens).
+This is in line with what is happening nowadays in other countries such as UK and Germany, where popular support is gradually shifting from historical istitutional parties (Labour, Tories, SPD) to new - or previously marginal - political forces (Reform UK, AfD, Greens).
 
 
 == Role of Incumbency
 
-When we consider that most popular party by number of votes we can clearly see an alternating trends, historically (before 2013) mainly between the biggest left party and Berlusconi's party. This trend continued after, but each time with a new face on top.
-However historically, for most of the duration of the 
+When we consider the most popular party by number of votes, we can clearly see an alternating trends. 
+Mainly between the biggest left party and Berlusconi's party historically (before 2013). This trend continued after, but each time with a new face on top.
+However, for most of the duration of the 
 Second Repulic #citeb(<koff2000italy>), we can observe that the leading party was electorally damaged by incumbency.
 As elected parties and leaders spent political capital, consensus declines. That is why a lot of work in the paper went into being able to include incumbency in the modelling.
 
@@ -84,11 +122,11 @@ As elected parties and leaders spent political capital, consensus declines. That
 
 == Google data as proxy for socially sensitive attitudes,
 In #cite(<salganik2020measuring>), researchers try to asses the impact of racial animus on Obama's electoral performance.
-This is not a trivial task since in surveys respondents tend to hide socially undesirable behaviours #citeb(<kreuter2008social>), such as racial animus, and chamption more accepted ones, such as inclusivity; this is sometime referred to as social desirability bias. 
-Therefore researchers are always in search of unbiased indirect measures for sensitive topics.
-The proxy measure proposed by the author relies on the fact taht people feel more at ease in front of a screen in their own home in expressing themselves #citeb(<conti2007honest>),thus reducing social desirability bias.
+This is not a trivial task since, in surveys, respondents tend to hide socially undesirable behaviours #citeb(<kreuter2008social>), such as racial animus, and champion more accepted ones, such as inclusivity; this is sometime referred to as social desirability bias. 
+Therefore researchers are always in search of indirect unbiased measures for sensitive topics.
+The proxy measure proposed by the author relies on the fact that people feel more at ease in expressing themselves in front of a screen in their own home #citeb(<conti2007honest>),thus reducing social desirability bias.
 
-Let us introduce Google Trend data. Google stores the seraches as well as their origin. They provide free access to the aggregated data.
+Let us introduce Google Trend data. Google stores the searches as well as their origin. They provide free access to the aggregated data.
 In terms of relative search volume.
 Wheter it be over time, or over region, the data is standardized on a scale from 0 to 100. 
 The value of 100 is assigned to the subregion (or the time time interval) in which the ratio of searches containing the word of interest (or related searches) to total google searches, for a given time frame and area is maximum.
@@ -105,8 +143,8 @@ Where $S(T)_(k,t)$ is number of searches on google for term $k$ during time inte
 
 == Justification for the choice of the proxy
 We then define the Racially Charged Search Rate for (RCSR) a region, to be the relative search volume of the Italian equivalent of the n-word. From now on referred to as "WORD1".
-When looking what other kind of queries the word is used in,most of them are about a renowed italian toys company. However the relative volume of such searches is minor in comparison to the total number of searches for WORD1 (see @word1-dal).
-Other searches pertain surnames and names of tourist hotspots and businesses. However, they are also a negligible amount of the total searches for WORD1.
+When looking what other kind of queries the term is used in, most of them are about a renowed italian toys company. However the relative volume of such searches is minor in comparison to the total number of searches for WORD1 (see @word1-dal).
+Other searches pertain surnames and names of tourist hotspots and businesses. However, they are also a negligible amount of the total searches.
 
 The use of WORD1 has reached nowadays unambigously the status of slur in Italy #citeb(<gaye2023razza>). For this reason it was the search term of choice and it was not mixed with other terms potentially indicating racial animus. 
 More details can be found in the Appendix (see @word1-migration).
@@ -117,10 +155,10 @@ In the Italian context effect of racial animus  on national election is not triv
 And even when they NOTEexists they are seldom the center of public discourse.
 Roughly 1 million people are of african descent. Compared to the numbers of the US, they constitute a small minority of the population. 
 
-The topic of migration has been central to Italian political discourse, in particular after Lega party leader Matteo Salvini took the reins in 2013. 
+The topic of migration has been central to Italian political discourse, in particular after Lega party leader Matteo Salvini took the the center stage in 2013. 
 Most of the representation of black people in media consisted of migrants trying to reach Italian shores on boats. 
 The concern for migration issued could act as a confounder in the context of descerning wheter parties, such as the league, that focus their communication on this single issue, may muddy the waters NOTE, in the endeavor of measuring the impact of racial animus per se.
-However whenr looking at google trends' data, we can see that the search term for WORD1, remained stable since the first available gtrend data NOTE, while key terms referring to migration oscillated visible, following local trends.
+However when looking at google trends' data, we can see that the search term for WORD1, remained stable since the first available gtrend data NOTE, while key terms referring to migration oscillated visible, following local trends.
 
 The second part of the paper focuses on analyzing the electoral effect of this more aggressive campaign, and try to capture wheter racial animus played a role in this shifting political trends.
 
@@ -131,20 +169,21 @@ Also google search areas are neatly available only at regional level.
 Ideally it would be possible to construct more granular areas for rcsr. That could be done convenientely at the release of google official api. See "limitations" NOTE
 == Why is still relevant to the timeframe analyzed - before ChatGpt
 One concern regarding the use of google trends data is that nowadays most people replaced traditional search engines with LLMs. However the timeframe analyzed in this paper was before chatgpt market dominance. 
-As of November 2022, chatGPT had still not taken a piece of the pie of google market dominance. However further care must be exercises for future analysis that want to employ a similar method.
+As of November 2022, chatGPT had still not taken a piece of google's pie. However further care must be exercises for future analysis that want to employ a similar methodology.
 
 
 = Data
-The electoral data are from the Ministry of Internal Affairs #link("https://elezionistorico.interno.gov.it/")[_"https://elezionistorico.interno.gov.it/"_]. Data is available at comune level (town). 
+The electoral data are from the Ministry of Internal Affairs website #link("https://elezionistorico.interno.gov.it/")[_"https://elezionistorico.interno.gov.it/"_]#footnote("Accessed last on 15-01-2026"). Data is available at comune level (town). 
 Information about candidates and the electoral list (coalition) are available. 
-The region Valle d'Aosta is excluded from our analysis as they have autonomy as a region conerning electoral matters.
+The region Valle d'Aosta is excluded from our analysis as they have autonomy as a region when concerning electoral matters.
 
 The following can be noted:
 - the vote shares are similar across camera and senato;
 - voters express preference for parties intead of single candidates most of the time.
-In the current system, voting for a party counts as expressing a preference for the list the party is part of and for the local candidate running for the list. Expressing a vote for a party is only relevant to the extent of the proportionally assign share of the seats (Based on national vote shares for Camera, and regional for Senato).
+In the current system (2018-2022), voting for a party counts as expressing a preference for the list the party is part of and for the local candidate running for the list.
+Expressing a vote for a party is only relevant to the extent of the proportionally assigned share of the seats (based on national vote shares for Camera, and regional for Senato).
 
-Since the vote share distribution is similar between assemblies, all the data looked at from now on is from the Camera.
+Since the vote share distribution is similar between assemblies, all the data looked at from now on is coming from the Camera.
 
 = Methodlogy
 To tackle the measuring of effect of racial animus, two different research questions are proposed.

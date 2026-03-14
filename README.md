@@ -3,12 +3,12 @@
 ## Repository Layout
 
 ```
-   R/                          code for easing data manipulation
-   analysis/                   final analysis is performed
-   data/                       maps, electoral data, google trends data
-   graphs/                     code used to generate graphs
-   methods/                    testing different approaches to estimate dirichlet
-   term_paper/                 source code for the final paper
+ R/                          code for easing data manipulation
+ analysis/                   final analysis is performed
+ data/                       maps, electoral data, google trends data
+ graphs/                     code used to generate graphs
+ methods/                    testing different approaches to estimate dirichlet
+ term_paper/                 source code for the final paper
 ```
 
 ### `R/utils.R`
@@ -23,7 +23,7 @@ Performing the final analysis.
 | :----- | :---- |
 | `aggregate_model.R` | estimation of the aggregate model to answer Q1 |
 | `explore.R` | playing around with the data |
-| `mixed_model.R` | estimation of the two step dirichlet model |
+| `mixed_model.R` | estimation of the two step dirichlet model to answer Q2 |
 
 ### `data/`
 
