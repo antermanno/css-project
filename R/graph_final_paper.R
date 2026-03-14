@@ -1,9 +1,8 @@
 rm(list = ls())
-source("explore_data/utils.R")
+source("R/utils.R")
 library(data.table)
 library(ggplot2)
 library(dplyr)
-library(stringdist)
 library(sf)
 library(compositions)
 library(betareg)
@@ -61,7 +60,7 @@ scale_fill_manual(
 
 
 
-data18 <- party_abs_vote_share_by_comune(camera13)
+data18 <- party_abs_vote_share_by_comune(camera18)
 
 
 fit_dir = fitDirichlet(data18[,.(FRATELLI_D_ITALIA,LEGA,PARTITO_DEMOCRATICO, FORZA_ITALIA,

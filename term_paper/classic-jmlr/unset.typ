@@ -418,6 +418,16 @@ cartello : sign, cartel;\
 )<word1-migration>
 
 #figure(
+  image("img/rcsr_map.png"),
+  caption: [Racially Charged Search Rate over Years. It must be noted that the values are standardized along the 4-5 year time period before each election. The 2022 RCSR, is standardized across the 2018-2022 time frame. Where 2018 refers to the time after the election.]
+)<map-rcsr> 
+
+#figure(
+  image("img/turnout_map.png"),
+  caption: [Turnout across elections. We can observe a North South divide and a decreasing trend.]
+)<map-rcsr> 
+
+#figure(
   image("img/trentino_voteshare.png"),
   caption: [In Trentino-Alto Adige, a region with a strong independentist tendencies, we observe the mixture of beta behaviour described by #cite(<kononovicius2017modeling>).]
 )<trentino> 

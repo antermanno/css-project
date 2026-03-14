@@ -4,7 +4,7 @@ rm(list = ls())
 library(data.table)
 library(ggplot2)
 library(dplyr)
-source("explore_data/utils.R")
+source("R/utils.R")
 
 # load all electoral files from the data directory
 load_all_data_tables()

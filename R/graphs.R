@@ -1,5 +1,5 @@
 rm(list = ls())
-source("explore_data/utils.R")
+source("R/utils.R")
 library(data.table)
 library(ggplot2)
 library(dplyr)
@@ -51,15 +51,12 @@ left_join(tcam, tsen, by = "REGION",
 (test = get_turnout_by(camera18))
 test[, .(TURNOUT = (sum(TOTVOT)/sum(TOTEL)))]
 
-(tmp = get_rcsr_by_region(gtrend, year= 2018))
-(comune_whal = get_joint_voteshare(camera22, list = list,
-                                   by_comune = TRUE))
+list = "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA"
 
 pd_ = get_share_by_comune(camera18, list = "PARTITO DEMOCRATICO")
 dat = set_party_names(camera18)
 
 
-list = "PARTITO DEMOCRATICO - ITALIA DEMOCRATICA E PROGRESSISTA"
 data_by_comune_fi = inner_join(
 camera22[ LISTA == list, .(VOTI = sum(VOTI_LISTA)), by = .(REGION, COMUNE)],
 camera22[ LISTA == list, .(VOTERS = sum(VOTANTI)), by = .(REGION, COMUNE) ]
@@ -89,14 +86,6 @@ data_by_comune_fi |>
   geom_freqpoly(binwidth = 0.005)+
   theme_minimal()
 
-# (j(j(joint = get_joint_voteshare_rcsr_tbl(camera22 ,rcsr_tbl = tmp, #                                        #                              list = "FRATELLI D'ITALIA"))
-# get_vote_share_by_region_for_major_parties
-year = camera22
-all_parties = lapply(unique(year$LISTA) , get_joint_voteshare_rcsr_tbl,
-        table = year, rcsr_tbl = tmp)
-all_parties = rbindlist(all_parties)
-all_parties
-
 lista22 = camera22$LISTA |> unique()
 lista18 = camera18$LISTA |> unique()
 lista13 = camera13$LISTA |> unique()
@@ -117,7 +106,7 @@ filter_right_wing(
 # get the vote share for all party since 2013
 data_221813 = get_party_share_all_years()
 
-share_rx = get_share_by_region_year(data_221813, party = "CASAPOUND ITALIA")
+share_rx = get_share_by_region_year(data_221813, party = "O")
 
 # share_rx = data_221813[RIGHTWING == "MAINSTREAM_RIGHT",
 #           .(SHARE = sum(SHARE)), by = .(REGION, YEAR) ]
@@ -160,8 +149,8 @@ set_region_column_senato()
 #     c(lista08, lista13, lista18, lista22)
 # ) |> unique()
 
-# party_names = get_party_names()
-# party_names = setNames(party_names, party_names)
+party_names = get_party_names()
+party_names = setNames(party_names, party_names)
 
 RCSR_2022 = get_rcsr_by_region(gtrend, year = 2022)
 RCSR_2018 = get_rcsr_by_region(gtrend, year = 2018)
@@ -169,7 +158,6 @@ RCSR_2013 = get_rcsr_by_region(gtrend, year = 2013)
 
 tmp = get_final_dataset_by_party()
 # make a list with data for all parties
-# data_all = lapply(party_names,get_final_dataset_by_party)
 # by_party = get_final_dataset_by_party()
 # get_final_dataset_by_party(party = "PARTITO_DEMOCRATICO")
 
@@ -189,7 +177,7 @@ colors = c(MAINSTREAM_RIGHT ="#003366", PARTITO_DEMOCRATICO = "#fe624f",
 
 graph_party_dataset_add_column |>
   ggplot(aes(x = delta_turn2218, y = delta2218, colour = PARTY))+
-  geom_hline(yintercept = 0, size = 1.2)+
+  geom_hline(yintercept = 0, linewidth = 1.2)+
   geom_point()+
   geom_smooth(se = FALSE, method = "lm")+
   facet_grid(~PARTY)+
@@ -243,6 +231,10 @@ plot_delta_share_vs_turn_18 <- function(data, party){
     # geom_smooth( method = "lm", se = FALSE)+
     theme_bw()
 }
+
+
+data_all = lapply(party_names,get_final_dataset_by_party)
+
 plot_delta_share_vs_turn_22(data_all$FORZA_ITALIA, "FI")
 plot_delta_share_vs_turn_22(data_all$FRATELLI_D_ITALIA, "FRATELLI D'ITALIA")
 
@@ -325,8 +317,8 @@ camera22[DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI",
          .(VOTERS = sum(VOTANTITOT)), by = REGION])
 data_cor = inner_join(data_cor, tmp)
 
-data_cor22 = data_cor[, .(VOTESHARE = VOTI/VOTERS, REGION, RCSR_all_time )]
-ggplot(data_cor22, aes(x=VOTESHARE, y = scale(RCSR_all_time), colour = REGION))+
+data_cor22 = data_cor[, .(VOTESHARE = VOTI/VOTERS, REGION, RCSR_2022 )]
+ggplot(data_cor22, aes(x=VOTESHARE, y = scale(RCSR_2022), colour = REGION))+
   geom_point()+
   geom_abline()+
   theme_bw()
@@ -340,90 +332,16 @@ camera22[DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI",
          .(VOTERS = sum(VOTANTITOT)), by = REGION])
 data_cor = inner_join(data_cor, tmp)
 
-data_cor18 = data_cor[, .(VOTESHARE = VOTI/VOTERS, REGION, RCSR_all_time )]
+data_cor18 = data_cor[, .(VOTESHARE = VOTI/VOTERS, REGION, RCSR_2022)]
 
 # use a function to perform the same task
-(joint = get_joint_voteshare_rcsr_tbl(camera18,rcsr_tbl = tmp,
-                             list = "FRATELLI D'ITALIA"))
-camera18[LISTA =="FRATELLI D'ITALIA" , .(VOTI = sum(VOTI_LISTA)), by = REGION]
-camera18[LISTA == "TEST", .(VOTI = sum(VOTI_LISTA)), by = REGION]
-
 # correlation plots between rcsr variable and voteshare
-ggplot(data_cor18, aes(x=VOTESHARE, y = scale(RCSR_all_time), colour = REGION))+
+ggplot(data_cor18, aes(x=VOTESHARE, y = scale(RCSR_2022), colour = REGION))+
   geom_point()+
   geom_abline()+
   theme_bw()
 
 
-joined_voted_share = inner_join(data_cor18, data_cor22, by = c("REGION", "RCSR_all_time"))
-diff = joined_voted_share[, .(delta = VOTESHARE.y - VOTESHARE.x, REGION, RCSR_all_time)]
-diff |>
-  ggplot(aes( x = RCSR_all_time  , y = delta, colour = REGION))+
-  geom_point()+
-  geom_abline()+
-  theme_bw()
-
-
-tot_vot = camera22[,.(COMUNE, ELETTORITOT, VOTANTITOT, REGION)]
-lm( delta ~ RCSR_all_time, diff) |> summary()
-
-# glm( delta ~ RCSR_all_time, data = diff, family = "")
-
-# let's build some maps
-map_region = as.data.table(read_sf("data/Limiti01012022_g/Limiti01012022_g/Reg01012022_g/Reg01012022_g_WGS84.shp"))
-map_region[, REGION := stringr::str_extract(toupper(DEN_REG), '\\w*' )]
-turn_data = get_turnout_over_years()
-rcsr_data = get_rcsr_by_region(gtrend, 2022)
-
-data_map = left_join(map_region, turn_data, by = "REGION")
-data_map = left_join(data_map, rcsr_data, by = "REGION")
-
-final = get_final_dataset_by_party(party = "MAINSTREAM_RIGHT")
-# final = get_final_dataset_by_party(party = "PARTITO_DEMOCRATICO")
-data_map = left_join(data_map, final, by = "REGION")
-data_map = data_map[, RCSR := RCSR_2022.x]
-
-data_map |>
-  ggplot()+
-  geom_sf(aes(geometry = geometry, fill = RCSR))+
-  theme_minimal()+
-  scale_fill_gradient(low = "#f7f7f7", high =  "#a50f15")+
-  theme(axis.text = element_blank(),
-        axis.line = element_blank(),
-        axis.ticks = element_blank()
-        )+
-  labs(title = "RACIALLY CHARGED SEARCH RATE BY REGION - 2005/2022")
-
-
-data_map |>
-  ggplot()+
-  geom_sf(aes(geometry = geometry, fill = TURN22))+
-  theme_minimal()
-
-data_map[]|>
-  ggplot()+
-  geom_sf(aes(geometry = geometry, fill = delta_turn2218))+
-  scale_fill_gradient(low = "#a50f15" , high = "#f7f7f7")+
-  theme_classic()+
-  theme(axis.text = element_blank(),
-        axis.line = element_blank(),
-        axis.ticks = element_blank())
-
-#ffeda0
-#feb24c
-#f03b20::
-
-#f1a340
-#f7f7f7
-#998ec3
-data_map[]|>
-  ggplot()+
-  geom_sf(aes(geometry = geometry, fill = delta2218))+
-  scale_fill_gradient2(low = "#998ec3" , mid = "#f7f7f7", high = "#f1a340")+
-  theme_classic()+
-  theme(axis.text = element_blank(),
-        axis.line = element_blank(),
-        axis.ticks = element_blank())
 
 
 all_yrs = get_party_share_all_years()
@@ -525,26 +443,3 @@ gtrend$rcsr_italy_0522.csv |>
 #
 #
 #
-# (test = get_turnout_by(camera08[order(REGION)]))
-# (test2 = get_turnout_by(camera13[order(REGION)]))
-# (test3 = get_turnout_by(camera18[order(REGION)]))
-#
-# # turnaout change percentage
-# log(test3[REGION != "AOSTA",]$TURNOUT/test2$TURNOUT)*100
-# log(test2$TURNOUT/test$TURNOUT)*100
-#
-# # camera18[, REGION := stringr::str_extract(oIRCOSCRIZIONE, '\\w*')]
-# # tot_vot = camera18[,.(COMUNE, ELETTORI, VOTANTI, REGION)]
-# # vot_table = tot_vot[!duplicated(tot_vot),]
-# # total_Vot_region = vot_table[, .(TOTEL = sum(ELETTORITOT), TOTVOT = sum(VOTANTITOT)), by = REGION]
-# # total_Vot_region[, TURNOUT := TOTVOT/TOTEL]
-#
-# total_Vot_region
-# # compute fratelli d'italia % by region
-# vote_tot_by_region = camera22[, .(TOT_VOTES = sum(VOTILISTA)), by = .(REGION, DESCRLISTA)]
-# # [ DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI" ,  ]
-#
-# full_table = inner_join(tot_vot, vote_tot_by_region)[]# c08 = camera08[, .(TOT_VOTES = sum(VOTI_LISTA)), by = c("REGIONE", "LISTA")]
-# # c08[ REGIONE == "PUGLIA", ]
-# full_table[DESCRLISTA == "FRATELLI D'ITALIA CON GIORGIA MELONI",
-#            .(REGION, PERCENTAGE = TOT_VOTES / TOTALVOTEREGION  * 100)]

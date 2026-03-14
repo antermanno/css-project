@@ -28,7 +28,7 @@ For the data we need to get shares for each of the relevant parties:
 at electoral district (COMUNE) level.
 
 ```{r}
-source("../explore_data/utils.R")
+source("../R/utils.R")
 #load the data from eligendo.it
 load_all_data_tables()
 
