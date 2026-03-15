@@ -199,6 +199,11 @@ anova(fit_S_TIME, fit_S_rcsr)
 # Looking at the anova we test the interaction term.
 # We obtain a p-value of 0.01514. !!!
 
+# Computing the e-value as likelihood ratio between the model with and
+# without the interaction term
+e_val = exp( logLik(fit_S_rcsr) - logLik(fit_S_TIME) )
+e_val
+
 BIC(fit_inc, fit_A, fit_S_TIME,  fit_S_rcsr)
 AIC(fit_inc, fit_A, fit_S_TIME,  fit_S_rcsr)
 # looking at IC the model with the interaction is slightly better
@@ -219,6 +224,8 @@ plot(fit_S_rcsr, residuals(.) ~ RCSR | PARTY)
 fit_S_TIME
 
 plot(fit_S_TIME, fitted(.) ~ RCSR | PARTY)
+
+
 # Let's see if the league retained electors more in regions with an higher
 # rcsr score
 

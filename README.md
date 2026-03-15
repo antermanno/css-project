@@ -9,7 +9,7 @@ When running the scripts in rstudio, make sure to have initialized the session c
  R/                          code for easing data manipulation
  analysis/                   final analysis is performed
  data/                       maps, electoral data, google trends data
- graphs/                     code used to generate graphs
+ graphs/                     code for graph generation
  methods/                    testing different approaches to estimate dirichlet
  term_paper/                 source code for the final paper
 ```
@@ -41,7 +41,7 @@ Generating the graphs for the paper and presentation.
 
 Trying out different fitting methods for the Dirichlet model.
 
-When running the reticulate python interface, sometimes it is required clean the enviroment and restarting the r session to solve some errors after a failed run of a model.
+When running the reticulate python interface, sometimes it is required to clean the enviroment and restarting the r session to solve some errors after a failed run of a model.
 
 | Source | Notes |
 | :----- | :---- |

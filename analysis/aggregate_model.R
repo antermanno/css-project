@@ -64,8 +64,12 @@ rcsr_Coeff < 0
 # irregarding of outlier and non linear term adaptations.
 
 
-
-
+# Compute e-value with the likelihood ratio
+fit_no_rcsr = lm(delta2218 ~ delta_turn2218, data_for_reg )
+summary(fit_no_rcsr)
+lmtest::lrtest(fit_no_rcsr, fit_agg)
+e_val_agg_model = exp(logLik(fit_agg)- logLik(fit_no_rcsr))
+e_val_agg_model
 
 
 
