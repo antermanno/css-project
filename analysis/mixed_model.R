@@ -212,8 +212,8 @@ plot(fit_S_rcsr,PARTY   ~resid(.)  | year)
 # Those are to be expected as they have the least linear
 # electoral trajectory among parties.
 
-plot(fit, fitted(.) ~ RCSR | PARTY)
-plot(fit, residuals(.) ~ RCSR | PARTY)
+plot(fit_S_rcsr, fitted(.) ~ RCSR | PARTY)
+plot(fit_S_rcsr, residuals(.) ~ RCSR | PARTY)
 # In the graph it is possible to observe how the fitted
 # values and RCSR correlate for different parties
 fit_S_TIME

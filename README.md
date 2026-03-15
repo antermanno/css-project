@@ -1,5 +1,8 @@
 # Final Project for Computational Social Sciences Exam
 
+When running the scripts in rstudio, make sure to have initialized the session clicking on *final_proj.Rproj* or set the working directory the same as the root of the repository.
+
+
 ## Repository Layout
 
 ```
@@ -37,6 +40,8 @@ Generating the graphs for the paper and presentation.
 ### `methods/`
 
 Trying out different fitting methods for the Dirichlet model.
+
+When running the reticulate python interface, sometimes it is required clean the enviroment and restarting the r session to solve some errors after a failed run of a model.
 
 | Source | Notes |
 | :----- | :---- |
